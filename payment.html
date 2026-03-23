@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Razorpay Integration -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--navy-blue);
+            color: var(--navy-blue);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            color: var(--gold);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left: 4px solid var(--gold);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            color: var(--navy-blue);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: var(--dark-gray);
+            max-width: 600px;
+        }
+
+        /* Payment Layout */
+        .payment-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        /* Payment Form */
+        .payment-form-section {
+            margin-bottom: 30px;
+        }
+
+        .payment-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Payment Method Selection */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .payment-method {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .payment-method:hover {
+            border-color: var(--navy-blue);
+            background-color: rgba(26, 35, 126, 0.05);
+        }
+
+        .payment-method.selected {
+            border-color: var(--gold);
+            background-color: rgba(255, 179, 0, 0.1);
+        }
+
+        .payment-icon {
+            font-size: 2rem;
+            color: var(--navy-blue);
+            margin-bottom: 10px;
+        }
+
+        .payment-method.selected .payment-icon {
+            color: var(--gold);
+        }
+
+        .payment-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .payment-description {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        /* Card Form */
+        .card-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            background-color: var(--light-gray);
+        }
+
+        .card-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card-element {
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+            margin-bottom: 15px;
+        }
+
+        .card-logos {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .card-logo {
+            width: 40px;
+            height: 25px;
+            background-color: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+
+        /* UPI Form */
+        .upi-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            background-color: var(--light-gray);
+        }
+
+        .upi-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .upi-qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .upi-qr img {
+            max-width: 200px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            background-color: var(--white);
+        }
+
+        /* Order Summary */
+        .order-summary-section {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .summary-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .summary-header {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .summary-header h3 {
+            color: var(--navy-blue);
+            font-size: 1.4rem;
+        }
+
+        .summary-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .summary-label {
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .summary-value {
+            color: var(--navy-blue);
+            text-align: right;
+        }
+
+        .summary-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy-blue);
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .summary-divider {
+            height: 1px;
+            background-color: var(--medium-gray);
+            margin: 10px 0;
+        }
+
+        .summary-note {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Success Message */
+        .success-message {
+            color: var(--success);
+            background-color: rgba(56, 142, 60, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--success);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error);
+            background-color: rgba(211, 47, 47, 0.1);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--navy-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Receipt Section */
+        .receipt-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .receipt-card {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .receipt-header {
+            margin-bottom: 20px;
+        }
+
+        .receipt-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+
+        .receipt-title {
+            color: var(--navy-blue);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .receipt-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .payment-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-summary-section {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .receipt-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .receipt-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-name" id="userName">User</div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="citizen-dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="ai-legal-assistant.html"><i class="fas fa-robot"></i> AI Legal Assistant</a></li>
+                <li><a href="case-tracking.html"><i class="fas fa-search"></i> Track Case</a></li>
+                <li><a href="find-lawyer.html"><i class="fas fa-user-tie"></i> Find Lawyer</a></li>
+                <li><a href="document-locker.html"><i class="fas fa-file-contract"></i> Document Locker</a></li>
+                <li><a href="consultation-booking.html"><i class="fas fa-calendar-check"></i> Book Consultation</a></li>
+                <li><a href="#" class="active"><i class="fas fa-credit-card"></i> Payment</a></li>
+                <li><a href="knowledge-hub.html"><i class="fas fa-book"></i> Legal Knowledge</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Payment</h1>
+                <p>Complete your payment to confirm your legal consultation</p>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h2>Payment Successful!</h2>
+                <p id="successText">Your consultation has been confirmed. You will receive a confirmation email shortly.</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i> 
+                <span id="errorText">There was an error processing your payment. Please try again.</span>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Processing your payment...</p>
+            </div>
+
+            <!-- Payment Layout -->
+            <div class="payment-layout" id="paymentLayout">
+                <!-- Payment Form -->
+                <section class="payment-form-section">
+                    <div class="card payment-card">
+                        <h2>Payment Details</h2>
+                        
+                        <form id="paymentForm">
+                            <!-- Payment Method Selection -->
+                            <div class="form-group">
+                                <label class="form-label">Select Payment Method *</label>
+                                <div class="payment-methods">
+                                    <div class="payment-method" data-method="card">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-credit-card"></i>
+                                        </div>
+                                        <div class="payment-name">Credit/Debit Card</div>
+                                        <div class="payment-description">Visa, Mastercard, RuPay</div>
+                                    </div>
+                                    <div class="payment-method" data-method="upi">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div class="payment-name">UPI</div>
+                                        <div class="payment-description">Google Pay, PhonePe, Paytm</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="paymentMethod" required>
+                            </div>
+
+                            <!-- Card Payment Form -->
+                            <div class="card-form" id="cardForm">
+                                <div class="form-group">
+                                    <label for="cardNumber" class="form-label">Card Number *</label>
+                                    <input type="text" id="cardNumber" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cardExpiry" class="form-label">Expiry Date *</label>
+                                        <input type="text" id="cardExpiry" class="form-input" placeholder="MM/YY" maxlength="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cardCvv" class="form-label">CVV *</label>
+                                        <input type="text" id="cardCvv" class="form-input" placeholder="123" maxlength="3">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="cardName" class="form-label">Cardholder Name *</label>
+                                    <input type="text" id="cardName" class="form-input" placeholder="John Doe">
+                                </div>
+
+                                <div class="card-logos">
+                                    <div class="card-logo">VISA</div>
+                                    <div class="card-logo">MC</div>
+                                    <div class="card-logo">RUPAY</div>
+                                </div>
+                            </div>
+
+                            <!-- UPI Payment Form -->
+                            <div class="upi-form" id="upiForm">
+                                <div class="form-group">
+                                    <label for="upiId" class="form-label">UPI ID *</label>
+                                    <input type="text" id="upiId" class="form-input" placeholder="yourname@upi">
+                                </div>
+
+                                <div class="upi-qr">
+                                    <p>Or scan this QR code with your UPI app</p>
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JusticeSetu-Payment-1000" alt="UPI QR Code">
+                                    <p class="summary-note">Amount: ₹<span id="qrAmount">1000</span></p>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-full btn-icon" id="payButton">
+                                <i class="fas fa-lock"></i> Pay Now
+                            </button>
+
+                            <div class="summary-note">
+                                <p><i class="fas fa-shield-alt"></i> Your payment is secure and encrypted</p>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Order Summary -->
+                <section class="order-summary-section">
+                    <div class="card summary-card">
+                        <div class="summary-header">
+                            <h3>Order Summary</h3>
+                        </div>
+                        
+                        <div class="summary-details">
+                            <div class="summary-item">
+                                <span class="summary-label">Consultation With:</span>
+                                <span class="summary-value" id="summaryLawyer">Adv. Priya Sharma</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Date & Time:</span>
+                                <span class="summary-value" id="summaryDateTime">15 Dec, 3:00 PM</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Mode:</span>
+                                <span class="summary-value" id="summaryMode">Video Consultation</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Duration:</span>
+                                <span class="summary-value">30 minutes</span>
+                            </div>
+
+                            <div class="summary-divider"></div>
+
+                            <div class="summary-item">
+                                <span class="summary-label">Consultation Fee:</span>
+                                <span class="summary-value" id="consultationFee">₹ 1000</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Platform Fee:</span>
+                                <span class="summary-value">₹ 100</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">GST (18%):</span>
+                                <span class="summary-value" id="gstAmount">₹ 198</span>
+                            </div>
+
+                            <div class="summary-divider"></div>
+
+                            <div class="summary-item" style="font-weight: 600;">
+                                <span class="summary-label">Total Amount:</span>
+                                <span class="summary-value" id="totalAmount">₹ 1298</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-note">
+                            <p><i class="fas fa-info-circle"></i> You can cancel and get a full refund up to 24 hours before your consultation.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Receipt Section -->
+            <section class="receipt-section" id="receiptSection">
+                <div class="card receipt-card">
+                    <div class="receipt-header">
+                        <i class="fas fa-check-circle receipt-icon"></i>
+                        <h2 class="receipt-title">Payment Confirmed</h2>
+                        <p>Your legal consultation has been successfully booked</p>
+                    </div>
+
+                    <div class="receipt-details">
+                        <div class="receipt-item">
+                            <span>Transaction ID:</span>
+                            <span id="receiptTransactionId">TXN123456789</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Payment Date:</span>
+                            <span id="receiptDate">15 Dec 2023, 2:30 PM</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Payment Method:</span>
+                            <span id="receiptMethod">Credit Card</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Amount Paid:</span>
+                            <span id="receiptAmount">₹ 1298</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Consultation With:</span>
+                            <span id="receiptLawyer">Adv. Priya Sharma</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Consultation Date:</span>
+                            <span id="receiptConsultationDate">15 Dec 2023, 3:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-actions">
+                        <button class="btn btn-outline btn-icon" id="printReceiptBtn">
+                            <i class="fas fa-print"></i> Print Receipt
+                        </button>
+                        <a href="citizen-dashboard.html" class="btn btn-primary btn-icon">
+                            <i class="fas fa-home"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="ai-legal-assistant.html">AI Legal Assistant</a></li>
+                        <li><a href="find-lawyer.html">Find a Lawyer</a></li>
+                        <li><a href="consultation-booking.html">Book Consultation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const paymentForm = document.getElementById('paymentForm');
+        const paymentMethodInput = document.getElementById('paymentMethod');
+        const cardForm = document.getElementById('cardForm');
+        const upiForm = document.getElementById('upiForm');
+        const payButton = document.getElementById('payButton');
+        const successMessage = document.getElementById('successMessage');
+        const successText = document.getElementById('successText');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const paymentLayout = document.getElementById('paymentLayout');
+        const receiptSection = document.getElementById('receiptSection');
+        
+        // Summary elements
+        const summaryLawyer = document.getElementById('summaryLawyer');
+        const summaryDateTime = document.getElementById('summaryDateTime');
+        const summaryMode = document.getElementById('summaryMode');
+        const consultationFee = document.getElementById('consultationFee');
+        const gstAmount = document.getElementById('gstAmount');
+        const totalAmount = document.getElementById('totalAmount');
+        const qrAmount = document.getElementById('qrAmount');
+        
+        // Receipt elements
+        const receiptTransactionId = document.getElementById('receiptTransactionId');
+        const receiptDate = document.getElementById('receiptDate');
+        const receiptMethod = document.getElementById('receiptMethod');
+        const receiptAmount = document.getElementById('receiptAmount');
+        const receiptLawyer = document.getElementById('receiptLawyer');
+        const receiptConsultationDate = document.getElementById('receiptConsultationDate');
+        const printReceiptBtn = document.getElementById('printReceiptBtn');
+
+        // Current user data and payment state
+        let currentUser = null;
+        let consultationDetails = null;
+        let paymentAmount = 0;
+
+        // Check authentication and load user data
+        async function initializePayment() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            
+            // Load user data
+            await loadUserData();
+            
+            // Load consultation details
+            await loadConsultationDetails();
+            
+            // Initialize event listeners
+            initializeEventListeners();
+        }
+
+        // Load user data from database
+        async function loadUserData() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading user data:', error);
+                return;
+            }
+            
+            if (data) {
+                // Update UI with user data
+                userName.textContent = data.full_name || 'User';
+                
+                // Set avatar with first letter of name
+                if (data.full_name) {
+                    userAvatar.textContent = data.full_name.charAt(0).toUpperCase();
+                }
+            }
+        }
+
+        // Load consultation details for payment
+        async function loadConsultationDetails() {
+            try {
+                // In a real implementation, we would get the consultation ID from URL parameters or state
+                // For now, we'll get the most recent pending consultation for the user
+                const { data, error } = await supabase
+                    .from('consultations')
+                    .select(`
+                        *,
+                        lawyer:lawyer_id (
+                            users (
+                                full_name
+                            ),
+                            specialization,
+                            consultation_fee_chat,
+                            consultation_fee_video
+                        )
+                    `)
+                    .eq('citizen_id', currentUser.id)
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data) {
+                    consultationDetails = data;
+                    updateOrderSummary();
+                } else {
+                    // If no pending consultation, create mock data for demonstration
+                    consultationDetails = createMockConsultation();
+                    updateOrderSummary();
+                }
+                
+            } catch (error) {
+                console.error('Error loading consultation details:', error);
+                // Create mock data for demonstration
+                consultationDetails = createMockConsultation();
+                updateOrderSummary();
+            }
+        }
+
+        // Create mock consultation for demonstration
+        function createMockConsultation() {
+            return {
+                id: '1',
+                date_time: '2023-12-15T15:00:00Z',
+                mode: 'video',
+                lawyer: {
+                    users: {
+                        full_name: 'Adv. Priya Sharma'
+                    },
+                    specialization: 'Criminal Law',
+                    consultation_fee_chat: 500,
+                    consultation_fee_video: 1000
+                }
+            };
+        }
+
+        // Update order summary with consultation details
+        function updateOrderSummary() {
+            if (!consultationDetails) return;
+            
+            // Format date and time
+            const consultationDate = new Date(consultationDetails.date_time);
+            const formattedDate = consultationDate.toLocaleDateString('en-IN', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            });
+            
+            // Calculate fees
+            const consultationFeeAmount = consultationDetails.mode === 'chat' 
+                ? consultationDetails.lawyer.consultation_fee_chat 
+                : consultationDetails.lawyer.consultation_fee_video;
+            
+            const platformFee = 100;
+            const gst = Math.round((consultationFeeAmount + platformFee) * 0.18);
+            const total = consultationFeeAmount + platformFee + gst;
+            
+            paymentAmount = total;
+            
+            // Update UI
+            summaryLawyer.textContent = consultationDetails.lawyer.users.full_name;
+            summaryDateTime.textContent = formattedDate;
+            summaryMode.textContent = consultationDetails.mode === 'chat' ? 'Chat Consultation' : 'Video Consultation';
+            consultationFee.textContent = `₹ ${consultationFeeAmount}`;
+            gstAmount.textContent = `₹ ${gst}`;
+            totalAmount.textContent = `₹ ${total}`;
+            qrAmount.textContent = total;
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Payment method selection
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', () => {
+                    selectPaymentMethod(method);
+                });
+            });
+            
+            // Card number formatting
+            const cardNumberInput = document.getElementById('cardNumber');
+            cardNumberInput.addEventListener('input', formatCardNumber);
+            
+            // Card expiry formatting
+            const cardExpiryInput = document.getElementById('cardExpiry');
+            cardExpiryInput.addEventListener('input', formatCardExpiry);
+            
+            // Form submission
+            paymentForm.addEventListener('submit', handlePaymentSubmission);
+            
+            // Print receipt
+            printReceiptBtn.addEventListener('click', printReceipt);
+        }
+
+        // Select payment method
+        function selectPaymentMethod(methodElement) {
+            // Remove selected class from all methods
+            document.querySelectorAll('.payment-method').forEach(m => {
+                m.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked method
+            methodElement.classList.add('selected');
+            
+            // Get the method value
+            const method = methodElement.getAttribute('data-method');
+            paymentMethodInput.value = method;
+            
+            // Show the appropriate form
+            if (method === 'card') {
+                cardForm.classList.add('active');
+                upiForm.classList.remove('active');
+            } else if (method === 'upi') {
+                upiForm.classList.add('active');
+                cardForm.classList.remove('active');
+            }
+        }
+
+        // Format card number with spaces
+        function formatCardNumber(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let matches = value.match(/\d{4,16}/g);
+            let match = matches && matches[0] || '';
+            let parts = [];
+            
+            for (let i = 0; i < match.length; i += 4) {
+                parts.push(match.substring(i, i + 4));
+            }
+            
+            if (parts.length) {
+                e.target.value = parts.join(' ');
+            } else {
+                e.target.value = value;
+            }
+        }
+
+        // Format card expiry date
+        function formatCardExpiry(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+        }
+
+        // Handle payment form submission
+        async function handlePaymentSubmission(e) {
+            e.preventDefault();
+            
+            // Hide any previous messages
+            hideMessages();
+            
+            // Validate form
+            if (!validatePaymentForm()) {
+                return;
+            }
+            
+            // Show loading spinner
+            loadingSpinner.style.display = 'block';
+            payButton.disabled = true;
+            
+            try {
+                // Process payment based on selected method
+                const paymentMethod = paymentMethodInput.value;
+                
+                if (paymentMethod === 'card') {
+                    await processCardPayment();
+                } else if (paymentMethod === 'upi') {
+                    await processUPIPayment();
+                }
+                
+            } catch (error) {
+                console.error('Payment processing error:', error);
+                loadingSpinner.style.display = 'none';
+                payButton.disabled = false;
+                showError('Failed to process payment. Please try again.');
+            }
+        }
+
+        // Validate payment form
+        function validatePaymentForm() {
+            const paymentMethod = paymentMethodInput.value;
+            
+            if (!paymentMethod) {
+                showError('Please select a payment method.');
+                return false;
+            }
+            
+            if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                const cardExpiry = document.getElementById('cardExpiry').value;
+                const cardCvv = document.getElementById('cardCvv').value;
+                const cardName = document.getElementById('cardName').value;
+                
+                if (!cardNumber || cardNumber.length !== 16) {
+                    showError('Please enter a valid 16-digit card number.');
+                    return false;
+                }
+                
+                if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                    showError('Please enter a valid expiry date (MM/YY).');
+                    return false;
+                }
+                
+                if (!cardCvv || cardCvv.length !== 3) {
+                    showError('Please enter a valid 3-digit CVV.');
+                    return false;
+                }
+                
+                if (!cardName) {
+                    showError('Please enter the cardholder name.');
+                    return false;
+                }
+                
+            } else if (paymentMethod === 'upi') {
+                const upiId = document.getElementById('upiId').value;
+                
+                if (!upiId || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)) {
+                    showError('Please enter a valid UPI ID.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Process card payment (using Razorpay integration)
+        async function processCardPayment() {
+            // In a real implementation, we would:
+            // 1. Create a Razorpay order on the server
+            // 2. Use the order ID to initialize Razorpay checkout
+            // 3. Handle the payment callback
+            
+            // For demonstration, we'll simulate a successful payment after a delay
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                payButton.disabled = false;
+                
+                // Simulate successful payment
+                completePayment('card');
+            }, 2000);
+            
+            // Example Razorpay integration (commented out for demo):
+            /*
+            const options = {
+                key: 'rzp_test_YOUR_KEY_ID', // Replace with your Razorpay key
+                amount: paymentAmount * 100, // Amount in paise
+                currency: 'INR',
+                name: 'JusticeSetu',
+                description: 'Legal Consultation Payment',
+                image: 'https://your-logo-url',
+                handler: function(response) {
+                    // Handle successful payment
+                    completePayment('card', response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: document.getElementById('cardName').value,
+                    email: currentUser.email,
+                    contact: '9999999999' // Would come from user profile
+                },
+                theme: {
+                    color: '#1a237e'
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+            */
+        }
+
+        // Process UPI payment
+        async function processUPIPayment() {
+            // In a real implementation, we would:
+            // 1. Initiate UPI payment through a payment gateway
+            // 2. Poll for payment status
+            // 3. Handle the payment callback
+            
+            // For demonstration, we'll simulate a successful payment after a delay
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                payButton.disabled = false;
+                
+                // Simulate successful payment
+                completePayment('upi');
+            }, 2000);
+        }
+
+        // Complete payment process
+        async function completePayment(method, transactionId = null) {
+            try {
+                // Generate a transaction ID if not provided
+                if (!transactionId) {
+                    transactionId = 'TXN' + Date.now().toString().substring(5);
+                }
+                
+                // Update consultation status in database
+                if (consultationDetails && consultationDetails.id) {
+                    const { error } = await supabase
+                        .from('consultations')
+                        .update({ 
+                            status: 'confirmed',
+                            payment_status: 'paid',
+                            payment_method: method,
+                            transaction_id: transactionId,
+                            paid_amount: paymentAmount
+                        })
+                        .eq('id', consultationDetails.id);
+                    
+                    if (error) {
+                        throw error;
+                    }
+                }
+                
+                // Show success and receipt
+                showReceipt(method, transactionId);
+                
+            } catch (error) {
+                console.error('Error completing payment:', error);
+                showError('Payment completed but there was an error updating your consultation. Please contact support.');
+            }
+        }
+
+        // Show receipt after successful payment
+        function showReceipt(method, transactionId) {
+            // Hide payment form and show receipt
+            paymentLayout.style.display = 'none';
+            receiptSection.style.display = 'block';
+            
+            // Update receipt details
+            const now = new Date();
+            receiptTransactionId.textContent = transactionId;
+            receiptDate.textContent = now.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            });
+            receiptMethod.textContent = method === 'card' ? 'Credit/Debit Card' : 'UPI';
+            receiptAmount.textContent = `₹ ${paymentAmount}`;
+            receiptLawyer.textContent = consultationDetails.lawyer.users.full_name;
+            
+            const consultationDate = new Date(consultationDetails.date_time);
+            receiptConsultationDate.textContent = consultationDate.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            });
+            
+            // Scroll to receipt
+            receiptSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Print receipt
+        function printReceipt() {
+            window.print();
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            successText.textContent = message;
+            successMessage.style.display = 'block';
+            
+            // Scroll to top to show message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Scroll to top to show message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Hide all messages
+        function hideMessages() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Initialize the payment page when page loads
+        document.addEventListener('DOMContentLoaded', initializePayment);
+    </script>
+</body>
+</html>

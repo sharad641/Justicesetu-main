@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Legal Assistant - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--navy-blue);
+            color: var(--navy-blue);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            color: var(--gold);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left: 4px solid var(--gold);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* AI Assistant Header */
+        .assistant-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .assistant-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--navy-blue) 0%, var(--navy-blue-light) 100%);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .assistant-info h1 {
+            color: var(--navy-blue);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .assistant-info p {
+            color: var(--dark-gray);
+        }
+
+        /* AI Assistant Layout */
+        .assistant-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            flex: 1;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chat-header h2 {
+            color: var(--navy-blue);
+            font-size: 1.4rem;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            max-height: 500px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+            text-align: right;
+        }
+
+        .message.assistant .message-time {
+            text-align: left;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            resize: none;
+            height: 60px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .chat-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .voice-btn, .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .voice-btn {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+
+        .voice-btn:hover {
+            background-color: var(--medium-gray);
+        }
+
+        .voice-btn.listening {
+            background-color: var(--error);
+            color: var(--white);
+            animation: pulse 1.5s infinite;
+        }
+
+        .send-btn {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .send-btn:hover {
+            background-color: var(--navy-blue-light);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Sidebar Content */
+        .sidebar-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .suggested-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .question-chip {
+            padding: 10px 15px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid var(--gold);
+        }
+
+        .question-chip:hover {
+            transform: translateX(5px);
+            background-color: rgba(255, 179, 0, 0.1);
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--navy-blue);
+            background-color: rgba(26, 35, 126, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 2rem;
+            color: var(--navy-blue);
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .uploaded-files {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: var(--navy-blue);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .file-action {
+            background: none;
+            border: none;
+            color: var(--dark-gray);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .file-action:hover {
+            color: var(--navy-blue);
+        }
+
+        /* Output Sections */
+        .output-sections {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .output-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .output-header h3 {
+            color: var(--navy-blue);
+            font-size: 1.2rem;
+        }
+
+        .output-content {
+            flex: 1;
+            padding: 15px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            min-height: 150px;
+            overflow-y: auto;
+        }
+
+        .output-placeholder {
+            color: var(--dark-gray);
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .assistant-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .output-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+            
+            .chat-input-container {
+                flex-direction: column;
+            }
+            
+            .chat-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+            margin-left: 10px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--medium-gray);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background-color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-name" id="userName">User</div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="citizen-dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" class="active"><i class="fas fa-robot"></i> AI Legal Assistant</a></li>
+                <li><a href="case-tracking.html"><i class="fas fa-search"></i> Track Case</a></li>
+                <li><a href="find-lawyer.html"><i class="fas fa-user-tie"></i> Find Lawyer</a></li>
+                <li><a href="document-locker.html"><i class="fas fa-file-contract"></i> Document Locker</a></li>
+                <li><a href="consultation-booking.html"><i class="fas fa-calendar-check"></i> Book Consultation</a></li>
+                <li><a href="knowledge-hub.html"><i class="fas fa-book"></i> Legal Knowledge</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- AI Assistant Header -->
+            <div class="assistant-header">
+                <div class="assistant-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="assistant-info">
+                    <h1>AI Legal Assistant</h1>
+                    <p>Get instant answers to your legal questions and document analysis</p>
+                </div>
+            </div>
+
+            <!-- AI Assistant Layout -->
+            <div class="assistant-layout">
+                <!-- Chat Container -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2>Legal Assistant Chat</h2>
+                        <div class="chat-actions">
+                            <button class="btn btn-outline btn-small" id="clearChatBtn">
+                                <i class="fas fa-trash"></i> Clear Chat
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message assistant">
+                            <div class="message-content">
+                                <p>Hello! I'm your AI Legal Assistant. How can I help you with your legal questions today?</p>
+                                <div class="message-time">Just now</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <textarea class="chat-input" id="chatInput" placeholder="Type your legal question here..."></textarea>
+                        <div class="chat-buttons">
+                            <button class="voice-btn" id="voiceBtn" title="Voice Input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="send-btn" id="sendBtn" title="Send Message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Content -->
+                <div class="sidebar-content">
+                    <!-- Suggested Questions -->
+                    <div class="card">
+                        <h3>Suggested Questions</h3>
+                        <div class="suggested-questions">
+                            <div class="question-chip" data-question="What are my rights as a tenant?">
+                                <i class="fas fa-home"></i> Tenant Rights
+                            </div>
+                            <div class="question-chip" data-question="How to file a consumer complaint?">
+                                <i class="fas fa-shopping-cart"></i> Consumer Complaint
+                            </div>
+                            <div class="question-chip" data-question="What documents are needed for property registration?">
+                                <i class="fas fa-file-contract"></i> Property Registration
+                            </div>
+                            <div class="question-chip" data-question="How to draft a legal notice?">
+                                <i class="fas fa-envelope"></i> Draft Legal Notice
+                            </div>
+                            <div class="question-chip" data-question="What is the process for divorce by mutual consent?">
+                                <i class="fas fa-heart"></i> Divorce Process
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload -->
+                    <div class="card">
+                        <h3>Upload Documents</h3>
+                        <div class="upload-section">
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop files here or click to browse</p>
+                                <input type="file" id="fileInput" style="display: none;" multiple>
+                            </div>
+                            <div class="uploaded-files" id="uploadedFiles">
+                                <!-- Uploaded files will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Sections -->
+            <div class="output-sections">
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>Legal Summary</h3>
+                        <button class="btn btn-outline btn-small" id="copySummaryBtn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div class="output-content" id="summaryOutput">
+                        <div class="output-placeholder">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Legal summary will appear here after analysis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>Draft Documents</h3>
+                        <button class="btn btn-outline btn-small" id="copyDraftBtn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div class="output-content" id="draftOutput">
+                        <div class="output-placeholder">
+                            <i class="fas fa-edit"></i>
+                            <p>Document drafts will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="ai-legal-assistant.html">AI Legal Assistant</a></li>
+                        <li><a href="find-lawyer.html">Find a Lawyer</a></li>
+                        <li><a href="case-tracking.html">Case Tracking</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Free Legal AI API - Using Hugging Face Inference API with a legal model
+        const LEGAL_API_URL = 'https://api-inference.huggingface.co/models/joelito/legal-swiss-roberta-large';
+        // Note: In production, you would need to get a free API token from Hugging Face
+        const HF_API_TOKEN = 'your_hugging_face_api_token_here'; // Replace with your actual token
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadedFiles = document.getElementById('uploadedFiles');
+        const summaryOutput = document.getElementById('summaryOutput');
+        const draftOutput = document.getElementById('draftOutput');
+        const copySummaryBtn = document.getElementById('copySummaryBtn');
+        const copyDraftBtn = document.getElementById('copyDraftBtn');
+        const toast = document.getElementById('toast');
+
+        // Current user data
+        let currentUser = null;
+        let isListening = false;
+        let recognition = null;
+        let uploadedFilesList = [];
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = 'toast';
+            if (isError) toast.classList.add('error');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check authentication and load user data
+        async function initializeAssistant() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    console.error('Error getting session:', error);
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!session) {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = session.user;
+                
+                // Load user data
+                await loadUserData();
+                
+                // Load previous chat history
+                await loadChatHistory();
+                
+                // Initialize voice recognition if available
+                initializeVoiceRecognition();
+                
+                // Set up real-time chat updates
+                setupRealtimeUpdates();
+            } catch (error) {
+                console.error('Error initializing assistant:', error);
+                showToast('Error initializing assistant. Please refresh the page.', true);
+            }
+        }
+
+        // Set up real-time updates for chat
+        function setupRealtimeUpdates() {
+            const subscription = supabase
+                .channel('ai_chats')
+                .on('postgres_changes', 
+                    { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'ai_chats',
+                        filter: `user_id=eq.${currentUser.id}`
+                    }, 
+                    (payload) => {
+                        // Only add if it's not already in the chat
+                        const existingMessages = chatMessages.querySelectorAll('.message');
+                        const lastMessage = existingMessages[existingMessages.length - 1];
+                        
+                        if (lastMessage && lastMessage.classList.contains('user')) {
+                            // Add the new assistant response
+                            addMessageToChat('assistant', payload.new.response, new Date(payload.new.created_at));
+                            hideTypingIndicator();
+                        }
+                    }
+                )
+                .subscribe();
+        }
+
+        // Load user data from database
+        async function loadUserData() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (error) {
+                    console.error('Error loading user data:', error);
+                    return;
+                }
+                
+                if (data) {
+                    // Update UI with user data
+                    userName.textContent = data.full_name || 'User';
+                    
+                    // Set avatar with first letter of name
+                    if (data.full_name) {
+                        userAvatar.textContent = data.full_name.charAt(0).toUpperCase();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load chat history from database
+        async function loadChatHistory() {
+            try {
+                const { data, error } = await supabase
+                    .from('ai_chats')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: true });
+                
+                if (error) {
+                    console.error('Error loading chat history:', error);
+                    return;
+                }
+                
+                // Clear initial welcome message if we have history
+                if (data && data.length > 0) {
+                    chatMessages.innerHTML = '';
+                    
+                    // Add messages to chat
+                    data.forEach(chat => {
+                        addMessageToChat('user', chat.query, new Date(chat.created_at));
+                        addMessageToChat('assistant', chat.response, new Date(chat.created_at));
+                    });
+                    
+                    // Scroll to bottom
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        // Initialize voice recognition
+        function initializeVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    voiceBtn.classList.add('listening');
+                    showToast('Listening... Speak now.');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    chatInput.value = transcript;
+                    isListening = false;
+                    voiceBtn.classList.remove('listening');
+                    showToast('Voice input captured.');
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    isListening = false;
+                    voiceBtn.classList.remove('listening');
+                    showToast('Voice recognition error. Please try again.', true);
+                };
+                
+                recognition.onend = function() {
+                    isListening = false;
+                    voiceBtn.classList.remove('listening');
+                };
+            } else {
+                // Voice recognition not supported
+                voiceBtn.style.display = 'none';
+                console.log('Voice recognition not supported in this browser');
+            }
+        }
+
+        // Add message to chat
+        function addMessageToChat(sender, text, timestamp) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p>${text}</p>
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-content">
+                    <p>AI Assistant is thinking</p>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Scroll to bottom of chat
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Get AI response from legal API
+        async function getAIResponse(userMessage, uploadedFiles = []) {
+            // Show loading state on send button
+            const originalSendBtnHTML = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<div class="loading-spinner"></div>';
+            sendBtn.disabled = true;
+            
+            try {
+                // Use Hugging Face Inference API for legal questions
+                // Note: In production, you would need to handle API tokens properly
+                const response = await fetch(LEGAL_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${HF_API_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inputs: userMessage,
+                        parameters: {
+                            max_length: 500,
+                            temperature: 0.7,
+                            do_sample: true
+                        }
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Extract the generated text from the response
+                let generatedText = '';
+                if (Array.isArray(result) && result[0] && result[0].generated_text) {
+                    generatedText = result[0].generated_text;
+                } else if (result.generated_text) {
+                    generatedText = result.generated_text;
+                } else {
+                    // Fallback to a simple response if API doesn't return expected format
+                    generatedText = await getFallbackResponse(userMessage);
+                }
+                
+                // Create summary and draft based on the response
+                const summary = generatedText.split('.')[0] + '.';
+                const draft = await generateLegalDraft(userMessage, generatedText);
+                
+                return {
+                    response: generatedText,
+                    summary: summary,
+                    draft: draft
+                };
+            } catch (error) {
+                console.error('Error calling legal API:', error);
+                // Fallback to rule-based responses if API fails
+                return await getFallbackResponse(userMessage);
+            } finally {
+                // Restore send button
+                sendBtn.innerHTML = originalSendBtnHTML;
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Fallback response when API is not available
+        async function getFallbackResponse(userMessage) {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Simple response logic based on keywords in the message
+            const message = userMessage.toLowerCase();
+            
+            if (message.includes('tenant') || message.includes('rent') || message.includes('lease')) {
+                return {
+                    response: "As a tenant in India, you have rights including: 1) Right to a habitable property, 2) Protection from unfair eviction, 3) Right to privacy, and 4) Right to essential services. The Rent Control Act governs most tenancy agreements. If facing issues, you can send a legal notice to your landlord before approaching the rent controller.",
+                    summary: "Tenant rights in India include habitable premises, protection from unfair eviction, privacy, and essential services. Disputes are governed by Rent Control Acts.",
+                    draft: "Draft Legal Notice to Landlord:\n\n[Your Name]\n[Your Address]\n[Date]\n\n[Landlord's Name]\n[Landlord's Address]\n\nSubject: Legal Notice regarding tenancy issues\n\nDear Sir/Madam,\n\nThis notice is regarding the ongoing issues with my tenancy at [property address]. Despite repeated requests, the following issues remain unresolved: [list issues].\n\nAs per the Rent Control Act, you are obligated to [specific obligations]. I request you to resolve these matters within 15 days, failing which I will be compelled to take legal action.\n\nThank you,\n[Your Name]"
+                };
+            } else if (message.includes('consumer') || message.includes('complaint') || message.includes('refund')) {
+                return {
+                    response: "To file a consumer complaint in India: 1) Gather all documents (invoice, warranty, communications), 2) Send a legal notice to the company, 3) If unresolved, file a complaint with the District Consumer Forum for claims up to ₹20 lakhs, State Commission for ₹20 lakhs to ₹1 crore, or National Commission for over ₹1 crore. The complaint should include your details, opposite party details, facts of the case, and relief sought.",
+                    summary: "Consumer complaints can be filed with Consumer Forums. Process involves sending legal notice, then filing complaint with appropriate forum based on claim value.",
+                    draft: "Draft Consumer Complaint:\n\nIN THE CONSUMER DISPUTES REDRESSAL COMMISSION, [District/State/National]\n\nComplaint Case No: ________ of 20__\n\n[Your Name] ... Complainant\nVs.\n[Company Name] ... Opposite Party\n\nFACTS:\n1. The complainant purchased [product/service] on [date] from the opposite party.\n2. The [product/service] had the following defects: [list defects].\n3. Despite complaints on [dates], the opposite party failed to resolve the issue.\n\nRELIEF SOUGHT:\n1. [Refund/Replacement] of the product/service.\n2. Compensation of ₹[amount] for mental harassment.\n3. Cost of proceedings.\n\n[Your Signature]"
+                };
+            } else if (message.includes('property') || message.includes('registration') || message.includes('sale deed')) {
+                return {
+                    response: "For property registration in India, you need: 1) Sale deed, 2) Title documents of the seller, 3) Encumbrance certificate, 4) Property tax receipts, 5) Identity proof of both parties, 6) Passport-size photographs, 7) No Objection Certificate if applicable. The registration must be done at the Sub-Registrar's Office within 4 months of execution. Stamp duty varies by state (typically 5-7% of property value).",
+                    summary: "Property registration requires sale deed, title documents, encumbrance certificate, identity proofs, and payment of stamp duty. Must be completed within 4 months.",
+                    draft: "Checklist for Property Registration:\n\n1. Sale Deed (original and copies)\n2. Title Deeds of seller (previous chain)\n3. Encumbrance Certificate (last 13 years)\n4. Property Tax Receipts (latest)\n5. Identity Proof (Aadhaar, PAN, Voter ID)\n6. Passport Photos (2 each)\n7. NOC from Society/Authority if applicable\n8. Stamp Duty Payment Proof\n9. Registration Fee Receipt\n10. Witnesses (2 persons with ID proof)"
+                };
+            } else if (message.includes('divorce') || message.includes('mutual consent')) {
+                return {
+                    response: "Divorce by mutual consent in India under Section 13B of Hindu Marriage Act requires: 1) Both spouses agree to divorce, 2) They have lived separately for at least one year, 3) They are unable to live together. Process: File joint petition, first motion, 6-month cooling period, second motion, then divorce decree. The petition should include details of marriage, separation period, and settlement of alimony, child custody, and property division.",
+                    summary: "Mutual consent divorce requires joint petition, 1-year separation, and two court motions with 6-month gap. Settlement on alimony, custody, and property is essential.",
+                    draft: "Draft Mutual Consent Divorce Petition:\n\nIN THE COURT OF [District Judge] AT [City]\n\nMatrimonial Case No: ________ of 20__\n\n[Wife Name] ... Petitioner 1\n[Huband Name] ... Petitioner 2\n\nJOINT PETITION FOR DIVORCE UNDER SECTION 13B\n\n1. Marriage was solemnized on [date] at [place].\n2. We have been living separately since [date] (over 1 year).\n3. We have mutually agreed to dissolve the marriage.\n4. We have settled matters of alimony, child custody, and property.\n\nTERMS OF SETTLEMENT:\n1. [Details of alimony, if any]\n2. [Child custody arrangements]\n3. [Property division details]\n\nWe request the Honorable Court to grant a decree of divorce.\n\n[Signatures of Both Parties]"
+                };
+            } else {
+                return {
+                    response: "I understand you're asking about legal matters. While I can provide general legal information, please consult with a qualified lawyer for specific advice related to your situation. For more accurate assistance, you can use our 'Find Lawyer' feature to connect with verified legal experts.",
+                    summary: "General legal information provided. For specific advice, consult a qualified lawyer through our platform.",
+                    draft: "No specific document draft generated. Please provide more details about the legal document you need assistance with."
+                };
+            }
+        }
+
+        // Generate legal draft based on user query and AI response
+        async function generateLegalDraft(query, response) {
+            // This is a simplified version - in production, you would use a more sophisticated approach
+            if (query.toLowerCase().includes('notice') || query.toLowerCase().includes('draft')) {
+                return `Draft Legal Document based on your query:\n\n[Document Title]\n\nParties:\n- [Your Name/Details]\n- [Other Party Name/Details]\n\nBackground:\nBased on your query about "${query}", this document addresses the key legal considerations.\n\nKey Provisions:\n1. [Key point from AI response]\n2. [Another key point]\n3. [Additional consideration]\n\nDisclaimer: This is a template document. Please consult with a qualified legal professional before using it.`;
+            } else {
+                return `Legal Notes based on your query:\n\nTopic: ${query}\n\nKey Points:\n1. ${response.split('. ')[0]}\n2. ${response.split('. ')[1]}\n3. ${response.split('. ')[2]}\n\nAdditional Considerations:\n- Consult with a legal professional for specific advice\n- Keep records of all relevant documents\n- Be aware of applicable deadlines and statutes of limitation`;
+            }
+        }
+
+        // Save chat to database
+        async function saveChatToDatabase(query, response) {
+            try {
+                const { data, error } = await supabase
+                    .from('ai_chats')
+                    .insert([
+                        {
+                            user_id: currentUser.id,
+                            query: query,
+                            response: response
+                        }
+                    ]);
+                
+                if (error) {
+                    console.error('Error saving chat:', error);
+                    showToast('Error saving chat. Please try again.', true);
+                }
+            } catch (error) {
+                console.error('Error saving chat:', error);
+                showToast('Error saving chat. Please try again.', true);
+            }
+        }
+
+        // Handle sending message
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) {
+                showToast('Please enter a message.', true);
+                return;
+            }
+            
+            // Add user message to chat
+            addMessageToChat('user', message, new Date());
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                // Get AI response
+                const aiResponse = await getAIResponse(message);
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Add AI response to chat
+                addMessageToChat('assistant', aiResponse.response, new Date());
+                
+                // Update output sections
+                updateOutputSections(aiResponse.summary, aiResponse.draft);
+                
+                // Save to database
+                await saveChatToDatabase(message, aiResponse.response);
+                
+                showToast('Response received successfully.');
+            } catch (error) {
+                console.error('Error getting AI response:', error);
+                hideTypingIndicator();
+                showToast('Error getting response. Please try again.', true);
+            }
+        }
+
+        // Update output sections
+        function updateOutputSections(summary, draft) {
+            summaryOutput.innerHTML = `<p>${summary}</p>`;
+            draftOutput.innerHTML = `<pre>${draft}</pre>`;
+        }
+
+        // Handle file upload
+        function handleFileUpload(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Check file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(`File "${file.name}" is too large. Maximum size is 10MB.`, true);
+                    continue;
+                }
+                
+                // Create file item
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // Format file size
+                const fileSize = file.size > 1024 * 1024 
+                    ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                    : (file.size / 1024).toFixed(2) + ' KB';
+                
+                // Get file icon based on type
+                let fileIcon = 'file';
+                if (file.type.includes('pdf')) fileIcon = 'file-pdf';
+                else if (file.type.includes('image')) fileIcon = 'file-image';
+                else if (file.type.includes('word') || file.type.includes('document')) fileIcon = 'file-word';
+                
+                fileItem.innerHTML = `
+                    <div class="file-icon">
+                        <i class="fas fa-${fileIcon}"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-action" title="Preview">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="file-action" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                uploadedFiles.appendChild(fileItem);
+                
+                // Store file reference
+                uploadedFilesList.push(file);
+                
+                // Add delete functionality
+                const deleteBtn = fileItem.querySelector('.file-actions .fa-trash').closest('button');
+                deleteBtn.addEventListener('click', () => {
+                    fileItem.remove();
+                    // Remove from uploaded files list
+                    const index = uploadedFilesList.indexOf(file);
+                    if (index > -1) {
+                        uploadedFilesList.splice(index, 1);
+                    }
+                    showToast('File removed.');
+                });
+                
+                // Add preview functionality (basic implementation)
+                const previewBtn = fileItem.querySelector('.file-actions .fa-eye').closest('button');
+                previewBtn.addEventListener('click', () => {
+                    if (file.type.includes('pdf')) {
+                        // For PDFs, open in new tab
+                        const fileURL = URL.createObjectURL(file);
+                        window.open(fileURL, '_blank');
+                    } else if (file.type.includes('image')) {
+                        // For images, show in modal (simplified)
+                        const fileURL = URL.createObjectURL(file);
+                        const img = new Image();
+                        img.src = fileURL;
+                        img.onload = function() {
+                            const win = window.open('', '_blank');
+                            win.document.write(`<img src="${fileURL}" style="max-width: 100%;">`);
+                        };
+                    } else {
+                        showToast('Preview not available for this file type.', true);
+                    }
+                });
+            }
+            
+            if (files.length > 0) {
+                showToast(`${files.length} file(s) uploaded successfully.`);
+            }
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        voiceBtn.addEventListener('click', () => {
+            if (!recognition) {
+                showToast('Voice recognition is not supported in your browser.', true);
+                return;
+            }
+            
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        clearChatBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to clear the chat history? This will remove all messages from this session.')) {
+                try {
+                    // Clear chat from database
+                    const { error } = await supabase
+                        .from('ai_chats')
+                        .delete()
+                        .eq('user_id', currentUser.id);
+                    
+                    if (error) {
+                        console.error('Error clearing chat history:', error);
+                        showToast('Error clearing chat history.', true);
+                        return;
+                    }
+                    
+                    // Clear UI
+                    chatMessages.innerHTML = `
+                        <div class="message assistant">
+                            <div class="message-content">
+                                <p>Hello! I'm your AI Legal Assistant. How can I help you with your legal questions today?</p>
+                                <div class="message-time">Just now</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    summaryOutput.innerHTML = `
+                        <div class="output-placeholder">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Legal summary will appear here after analysis</p>
+                        </div>
+                    `;
+                    
+                    draftOutput.innerHTML = `
+                        <div class="output-placeholder">
+                            <i class="fas fa-edit"></i>
+                            <p>Document drafts will appear here</p>
+                        </div>
+                    `;
+                    
+                    showToast('Chat history cleared successfully.');
+                } catch (error) {
+                    console.error('Error clearing chat history:', error);
+                    showToast('Error clearing chat history.', true);
+                }
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--navy-blue)';
+            uploadArea.style.backgroundColor = 'rgba(26, 35, 126, 0.1)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--medium-gray)';
+            uploadArea.style.backgroundColor = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--medium-gray)';
+            uploadArea.style.backgroundColor = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            handleFileUpload(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            handleFileUpload(files);
+            // Reset file input
+            fileInput.value = '';
+        });
+
+        // Suggested questions
+        document.querySelectorAll('.question-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const question = chip.getAttribute('data-question');
+                chatInput.value = question;
+                showToast('Question added to input. Click send or press Enter to submit.');
+            });
+        });
+
+        copySummaryBtn.addEventListener('click', () => {
+            const text = summaryOutput.innerText;
+            if (text.includes('Legal summary will appear here')) {
+                showToast('No content to copy.', true);
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                showToast('Summary copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy summary.', true);
+            });
+        });
+
+        copyDraftBtn.addEventListener('click', () => {
+            const text = draftOutput.innerText;
+            if (text.includes('Document drafts will appear here')) {
+                showToast('No content to copy.', true);
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                showToast('Draft copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy draft.', true);
+            });
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Error signing out:', error);
+                    showToast('Error signing out. Please try again.', true);
+                    return;
+                }
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showToast('Error signing out. Please try again.', true);
+            }
+        });
+
+        // Initialize the assistant when page loads
+        document.addEventListener('DOMContentLoaded', initializeAssistant);
+    </script>
+</body>
+</html>

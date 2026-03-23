@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--navy-blue);
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: var(--gold);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .signup-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .signup-image {
+            flex: 1;
+            background: linear-gradient(135deg, var(--navy-blue) 0%, var(--navy-blue-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            padding: 40px;
+            display: none;
+        }
+
+        .signup-image-content {
+            text-align: center;
+        }
+
+        .signup-image i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+
+        .signup-image h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .signup-form {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h1 {
+            color: var(--navy-blue);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: var(--dark-gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--white);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 5px;
+            border-radius: 5px;
+            background-color: var(--medium-gray);
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .password-strength.weak .password-strength-bar {
+            width: 33%;
+            background-color: var(--error);
+        }
+
+        .password-strength.medium .password-strength-bar {
+            width: 66%;
+            background-color: #ff9800;
+        }
+
+        .password-strength.strong .password-strength-bar {
+            width: 100%;
+            background-color: var(--success);
+        }
+
+        .password-requirements {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .requirement i {
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+
+        .requirement.met {
+            color: var(--success);
+        }
+
+        .requirement.unmet {
+            color: var(--dark-gray);
+        }
+
+        .conditional-field {
+            display: none;
+        }
+
+        .conditional-field.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-message {
+            color: var(--error);
+            background-color: rgba(211, 47, 47, 0.1);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success);
+            background-color: rgba(56, 142, 60, 0.1);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .terms-checkbox input {
+            margin-right: 10px;
+            margin-top: 4px;
+        }
+
+        .terms-checkbox label {
+            font-size: 0.9rem;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .signup-image {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signup-form {
+                padding: 30px 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-row .form-group {
+                width: 100%;
+            }
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="signup-container">
+                <!-- Signup Image/Info Section -->
+                <div class="signup-image">
+                    <div class="signup-image-content">
+                        <i class="fas fa-user-plus"></i>
+                        <h2>Join JusticeSetu Today</h2>
+                        <p>Create your account and get access to legal assistance, AI tools, and expert lawyers.</p>
+                        <div style="margin-top: 30px; text-align: left;">
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <i class="fas fa-check-circle" style="color: var(--gold); margin-right: 10px;"></i>
+                                <span>AI Legal Assistant</span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <i class="fas fa-check-circle" style="color: var(--gold); margin-right: 10px;"></i>
+                                <span>Case Tracking</span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <i class="fas fa-check-circle" style="color: var(--gold); margin-right: 10px;"></i>
+                                <span>Document Management</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <i class="fas fa-check-circle" style="color: var(--gold); margin-right: 10px;"></i>
+                                <span>Legal Expert Network</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Signup Form Section -->
+                <div class="signup-form">
+                    <div class="form-header">
+                        <h1>Create Your Account</h1>
+                        <p>Join JusticeSetu and access comprehensive legal assistance</p>
+                    </div>
+                    
+                    <!-- Error/Success Messages -->
+                    <div id="errorMessage" class="error-message">
+                        There was an error creating your account. Please try again.
+                    </div>
+                    
+                    <div id="successMessage" class="success-message">
+                        Account created successfully! Redirecting to login...
+                    </div>
+                    
+                    <!-- Signup Form -->
+                    <form id="signupForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" class="form-input" placeholder="Enter your phone number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userType" class="form-label">I am a</label>
+                            <select id="userType" class="form-select" required>
+                                <option value="">Select your role</option>
+                                <option value="citizen">Citizen</option>
+                                <option value="lawyer">Lawyer</option>
+                                <option value="ngo">NGO</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Conditional Field for Lawyers -->
+                        <div id="lawyerFields" class="conditional-field">
+                            <div class="form-group">
+                                <label for="barRegistration" class="form-label">Bar Registration ID</label>
+                                <input type="text" id="barRegistration" class="form-input" placeholder="Enter your bar registration ID">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="password-container">
+                                <input type="password" id="password" class="form-input" placeholder="Create a strong password" required>
+                                <button type="button" class="toggle-password" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="password-strength-bar"></div>
+                            </div>
+                            <div class="password-requirements">
+                                <div class="requirement unmet" id="lengthReq">
+                                    <i class="fas fa-circle"></i> At least 8 characters
+                                </div>
+                                <div class="requirement unmet" id="upperReq">
+                                    <i class="fas fa-circle"></i> One uppercase letter
+                                </div>
+                                <div class="requirement unmet" id="lowerReq">
+                                    <i class="fas fa-circle"></i> One lowercase letter
+                                </div>
+                                <div class="requirement unmet" id="numberReq">
+                                    <i class="fas fa-circle"></i> One number
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <div class="password-container">
+                                <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                                <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatch" style="margin-top: 8px; font-size: 0.85rem; display: none;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i> Passwords match
+                            </div>
+                            <div id="passwordMismatch" style="margin-top: 8px; font-size: 0.85rem; display: none;">
+                                <i class="fas fa-exclamation-circle" style="color: var(--error);"></i> Passwords do not match
+                            </div>
+                        </div>
+                        
+                        <div class="terms-checkbox">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <label for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-full" id="signupButton">
+                            <span id="signupButtonText">Create Account</span>
+                            <div id="signupSpinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i> Creating Account...
+                            </div>
+                        </button>
+                    </form>
+                    
+                    <div class="login-link">
+                        <p>Already have an account? <a href="login.html">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="ai-legal-assistant.html">AI Legal Assistant</a></li>
+                        <li><a href="find-lawyer.html">Find a Lawyer</a></li>
+                        <li><a href="case-tracking.html">Case Tracking</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM Elements
+        const signupForm = document.getElementById('signupForm');
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const userTypeSelect = document.getElementById('userType');
+        const lawyerFields = document.getElementById('lawyerFields');
+        const barRegistrationInput = document.getElementById('barRegistration');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const signupButton = document.getElementById('signupButton');
+        const signupButtonText = document.getElementById('signupButtonText');
+        const signupSpinner = document.getElementById('signupSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordMatch = document.getElementById('passwordMatch');
+        const passwordMismatch = document.getElementById('passwordMismatch');
+        
+        // Password requirement elements
+        const lengthReq = document.getElementById('lengthReq');
+        const upperReq = document.getElementById('upperReq');
+        const lowerReq = document.getElementById('lowerReq');
+        const numberReq = document.getElementById('numberReq');
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle eye icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Toggle confirm password visibility
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            
+            // Toggle eye icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Show/hide lawyer fields based on user type
+        userTypeSelect.addEventListener('change', function() {
+            if (this.value === 'lawyer') {
+                lawyerFields.classList.add('show');
+                barRegistrationInput.setAttribute('required', 'required');
+            } else {
+                lawyerFields.classList.remove('show');
+                barRegistrationInput.removeAttribute('required');
+            }
+        });
+
+        // Password strength checker
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Check password requirements
+            const hasMinLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            
+            // Update requirement indicators
+            updateRequirement(lengthReq, hasMinLength);
+            updateRequirement(upperReq, hasUpperCase);
+            updateRequirement(lowerReq, hasLowerCase);
+            updateRequirement(numberReq, hasNumber);
+            
+            // Calculate strength
+            if (hasMinLength) strength++;
+            if (hasUpperCase) strength++;
+            if (hasLowerCase) strength++;
+            if (hasNumber) strength++;
+            
+            // Update strength indicator
+            passwordStrength.className = 'password-strength';
+            if (strength > 0) {
+                if (strength <= 2) {
+                    passwordStrength.classList.add('weak');
+                } else if (strength === 3) {
+                    passwordStrength.classList.add('medium');
+                } else {
+                    passwordStrength.classList.add('strong');
+                }
+            }
+            
+            // Check password match
+            checkPasswordMatch();
+        });
+
+        // Confirm password match checker
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (confirmPassword === '') {
+                passwordMatch.style.display = 'none';
+                passwordMismatch.style.display = 'none';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                passwordMatch.style.display = 'block';
+                passwordMismatch.style.display = 'none';
+            } else {
+                passwordMatch.style.display = 'none';
+                passwordMismatch.style.display = 'block';
+            }
+        }
+
+        function updateRequirement(element, condition) {
+            if (condition) {
+                element.classList.remove('unmet');
+                element.classList.add('met');
+                element.querySelector('i').className = 'fas fa-check-circle';
+            } else {
+                element.classList.remove('met');
+                element.classList.add('unmet');
+                element.querySelector('i').className = 'fas fa-circle';
+            }
+        }
+
+        // Handle form submission
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const fullName = fullNameInput.value.trim();
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const userType = userTypeSelect.value;
+            const barRegistration = barRegistrationInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            // Validation
+            if (!fullName || !email || !phone || !userType || !password) {
+                showError('Please fill in all required fields');
+                return;
+            }
+            
+            if (userType === 'lawyer' && !barRegistration) {
+                showError('Please provide your bar registration ID');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            // Check password strength
+            const hasMinLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            
+            if (!hasMinLength || !hasUpperCase || !hasLowerCase || !hasNumber) {
+                showError('Password does not meet the requirements');
+                return;
+            }
+            
+            // Show loading state
+            signupButtonText.style.display = 'none';
+            signupSpinner.style.display = 'block';
+            signupButton.disabled = true;
+            
+            try {
+                // Sign up with Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            phone: phone,
+                            role: userType,
+                            bar_registration_id: userType === 'lawyer' ? barRegistration : null
+                        }
+                    }
+                });
+                
+                if (authError) {
+                    throw authError;
+                }
+                
+                // Insert user into public.users table
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            full_name: fullName,
+                            email: email,
+                            phone: phone,
+                            role: userType,
+                            bar_registration_id: userType === 'lawyer' ? barRegistration : null
+                        }
+                    ]);
+                
+                if (userError) {
+                    throw userError;
+                }
+                
+                // If user is a lawyer, create lawyer profile
+                if (userType === 'lawyer') {
+                    const { error: lawyerError } = await supabase
+                        .from('lawyer_profiles')
+                        .insert([
+                            {
+                                id: authData.user.id,
+                                specialization: '',
+                                experience_years: 0,
+                                location: '',
+                                languages: [],
+                                verified: false
+                            }
+                        ]);
+                    
+                    if (lawyerError) {
+                        console.error('Error creating lawyer profile:', lawyerError);
+                        // Continue anyway as the user account was created
+                    }
+                }
+                
+                // Show success message
+                showSuccess('Account created successfully! Please check your email for verification.');
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError(error.message || 'Failed to create account. Please try again.');
+            } finally {
+                // Reset button state
+                signupButtonText.style.display = 'block';
+                signupSpinner.style.display = 'none';
+                signupButton.disabled = false;
+            }
+        });
+
+        // Helper functions
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Check if user is already logged in
+        async function checkAuthStatus() {
+            const { data } = await supabase.auth.getSession();
+            
+            if (data.session) {
+                // User is already logged in, redirect to dashboard
+                const userRole = data.session.user.user_metadata?.role || 'citizen';
+                
+                if (userRole === 'lawyer') {
+                    window.location.href = 'lawyer-dashboard.html';
+                } else if (userRole === 'admin') {
+                    window.location.href = 'admin-panel.html';
+                } else {
+                    window.location.href = 'citizen-dashboard.html';
+                }
+            }
+        }
+
+        // Check authentication status on page load
+        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+    </script>
+</body>
+</html>

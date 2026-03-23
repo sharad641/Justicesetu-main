@@ -1,0 +1,505 @@
+/* Ultra-Premium Booking Styles */
+
+.booking-page {
+  background: #020617; /* Deep Slate */
+  color: #f8fafc;
+  min-height: 100vh;
+  padding-top: 80px; /* Offset Navbar */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 60px;
+}
+
+/* Immersive Background */
+.booking-bg-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+}
+
+.orb-primary {
+  width: 600px;
+  height: 600px;
+  background: #4f46e5;
+  top: -10%;
+  right: -10%;
+  animation: floatOrb 20s infinite alternate;
+}
+
+.orb-secondary {
+  width: 500px;
+  height: 500px;
+  background: #10b981;
+  bottom: 0%;
+  left: -10%;
+  animation: floatOrb 25s infinite alternate-reverse;
+}
+
+/* Container */
+.booking-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 760px;
+}
+
+.booking-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(99, 102, 241, 0.1);
+  overflow: hidden;
+}
+
+/* Header & Stepper */
+.booking-header {
+  padding: 32px 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.lawyer-min-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.lawyer-min-profile img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #6366f1;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.lawyer-min-profile h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: #fff;
+}
+
+.lawyer-min-profile p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.lawyer-min-profile strong {
+  color: #e2e8f0;
+}
+
+.booking-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.step.active {
+  color: #fff;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.step.active .step-circle {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #334155;
+  margin: 0 12px;
+  margin-bottom: 20px; /* Align with circle centers roughly */
+  position: relative;
+  z-index: 1;
+}
+
+.step-line.active {
+  background: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Booking Body */
+.booking-body {
+  padding: 40px;
+}
+
+.panel-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.panel-subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 12px;
+}
+
+/* Custom Date/Time Inputs */
+.premium-date-input {
+  position: relative;
+  width: 100%;
+}
+
+.premium-date-input .icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #818cf8;
+  pointer-events: none;
+}
+
+.premium-date-input input {
+  width: 100%;
+  appearance: none;
+  background: rgba(11, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 16px 16px 44px;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1.05rem;
+  outline: none;
+  transition: all 0.3s;
+  cursor: pointer;
+  color-scheme: dark; /* Enables native dark mode calendar icon on some browsers */
+}
+
+.premium-date-input input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.time-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.time-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.time-pill.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.1));
+  border-color: #818cf8;
+  color: #a5b4fc;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 0 0 1px #6366f1;
+}
+
+.time-pill .pill-icon {
+  color: inherit;
+}
+
+.time-placeholder {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+/* Step 2 Inputs */
+.premium-textarea textarea {
+  width: 100%;
+  background: rgba(11, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+  resize: vertical;
+}
+
+.premium-textarea textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.file-dropzone {
+  position: relative;
+  background: rgba(11, 15, 25, 0.4);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.file-dropzone:hover {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.dropzone-icon {
+  margin-bottom: 12px;
+  color: #64748b;
+}
+
+.file-dropzone:hover .dropzone-icon {
+  color: #818cf8;
+}
+
+.file-dropzone strong {
+  color: #e2e8f0;
+  display: inline;
+  font-weight: 600;
+}
+
+.file-dropzone span {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+.file-dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Action Buttons */
+.booking-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-fade {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  padding: 16px 24px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-fade:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.btn-glow-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-glow-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-glow-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.6);
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
+/* Step 3 - Summary */
+.success-icon-large {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.summary-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row span {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.summary-row strong {
+  color: #e2e8f0;
+  font-size: 1.05rem;
+}
+
+.text-highlight {
+  color: #818cf8 !important;
+  font-size: 1.25rem !important;
+}
+
+.secure-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.secure-badge svg {
+  color: #10b981;
+}
+
+/* Utilities */
+.justify-center { justify-content: center; }
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .booking-header {
+    padding: 24px;
+  }
+  
+  .booking-body {
+    padding: 24px;
+  }
+  
+  .lawyer-min-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .step span {
+    display: none; /* Hide labels on mobile to save space */
+  }
+  
+  .time-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .booking-actions {
+    flex-direction: column-reverse; /* Put Cancel at bottom */
+  }
+  
+  .btn-glow-primary, .btn-fade {
+    width: 100%;
+    justify-content: center;
+  }
+}

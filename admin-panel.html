@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --warning: #f57c00;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--navy-blue);
+            color: var(--navy-blue);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: var(--white);
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--navy-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            color: var(--gold);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left: 4px solid var(--gold);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .welcome-section {
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h1 {
+            color: var(--navy-blue);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: var(--dark-gray);
+            max-width: 600px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 25px 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy-blue);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-action-card .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quick-action-card p {
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: var(--navy-blue);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(26, 35, 126, 0.05);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-verified {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-active {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Search and Filter */
+        .search-filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark-gray);
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--white);
+            min-width: 150px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--medium-gray);
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination-btn:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            border-color: var(--navy-blue);
+        }
+
+        .pagination-btn.active {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            border-color: var(--navy-blue);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-filter-bar {
+                flex-direction: column;
+            }
+            
+            .search-box, .filter-select {
+                min-width: 100%;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            color: var(--navy-blue);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--medium-gray);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background-color: rgba(26, 35, 126, 0.05);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--gold);
+            color: var(--navy-blue);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-name" id="userName">Admin</div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" data-section="users"><i class="fas fa-users"></i> User Management</a></li>
+                <li><a href="#" data-section="lawyers"><i class="fas fa-user-tie"></i> Lawyer Verification</a></li>
+                <li><a href="#" data-section="content"><i class="fas fa-file-alt"></i> Content Management</a></li>
+                <li><a href="#" data-section="cases"><i class="fas fa-gavel"></i> Case Lookup Logs</a></li>
+                <li><a href="#" data-section="analytics"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                <li><a href="#" data-section="system"><i class="fas fa-cog"></i> System Settings</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <h1>Admin Dashboard</h1>
+                    <p>Monitor platform activity, manage users, and oversee system operations.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-number" id="totalLawyers">0</div>
+                        <div class="stat-label">Registered Lawyers</div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-number" id="pendingVerifications">0</div>
+                        <div class="stat-label">Pending Verifications</div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-number" id="activeCases">0</div>
+                        <div class="stat-label">Active Cases</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Grid -->
+                <div class="dashboard-grid">
+                    <div class="card quick-action-card">
+                        <div class="card-title">
+                            <i class="fas fa-users"></i>
+                            User Management
+                        </div>
+                        <div class="card-content">
+                            <p>View and manage all platform users including citizens, lawyers, and NGOs.</p>
+                            <a href="#" class="btn btn-primary" data-section="users">Manage Users</a>
+                        </div>
+                    </div>
+
+                    <div class="card quick-action-card">
+                        <div class="card-title">
+                            <i class="fas fa-user-check"></i>
+                            Lawyer Verification
+                        </div>
+                        <div class="card-content">
+                            <p>Review and verify lawyer profiles to ensure platform quality and trust.</p>
+                            <a href="#" class="btn btn-primary" data-section="lawyers">Verify Lawyers</a>
+                        </div>
+                    </div>
+
+                    <div class="card quick-action-card">
+                        <div class="card-title">
+                            <i class="fas fa-file-alt"></i>
+                            Content Management
+                        </div>
+                        <div class="card-content">
+                            <p>Manage legal knowledge articles and platform content for the knowledge hub.</p>
+                            <a href="#" class="btn btn-primary" data-section="content">Manage Content</a>
+                        </div>
+                    </div>
+
+                    <div class="card quick-action-card">
+                        <div class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Platform Analytics
+                        </div>
+                        <div class="card-content">
+                            <p>View platform usage statistics, user engagement, and performance metrics.</p>
+                            <a href="#" class="btn btn-primary" data-section="analytics">View Analytics</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-history"></i>
+                        Recent Activity
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Date/Time</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityTable">
+                                <!-- Recent activity will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="users" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">User Management</h2>
+                    <div class="search-filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="userSearch" class="search-input" placeholder="Search users...">
+                        </div>
+                        <select id="userRoleFilter" class="filter-select">
+                            <option value="">All Roles</option>
+                            <option value="citizen">Citizen</option>
+                            <option value="lawyer">Lawyer</option>
+                            <option value="ngo">NGO</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <select id="userStatusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th>Registration Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <!-- Users will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="usersPagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Lawyer Verification Section -->
+            <section id="lawyers" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Lawyer Verification</h2>
+                    <div class="search-filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="lawyerSearch" class="search-input" placeholder="Search lawyers...">
+                        </div>
+                        <select id="verificationFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Location</th>
+                                <th>Bar Registration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lawyersTable">
+                            <!-- Lawyers will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="lawyersPagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Content Management Section -->
+            <section id="content" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Content Management</h2>
+                    <button class="btn btn-primary" id="addArticleBtn">Add New Article</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Created Date</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contentTable">
+                            <!-- Content will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="contentPagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Case Lookup Logs Section -->
+            <section id="cases" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Case Lookup Logs</h2>
+                    <div class="search-filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="caseSearch" class="search-input" placeholder="Search cases...">
+                        </div>
+                        <select id="caseStatusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Case Number</th>
+                                <th>Court Name</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Next Hearing</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casesTable">
+                            <!-- Cases will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="casesPagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Platform Analytics</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="overview">Overview</div>
+                        <div class="tab" data-tab="users">User Analytics</div>
+                        <div class="tab" data-tab="engagement">Engagement</div>
+                    </div>
+                </div>
+                
+                <div id="analyticsOverview" class="analytics-tab active">
+                    <div class="stats-grid">
+                        <div class="card stat-card">
+                            <div class="stat-number" id="dailyActiveUsers">0</div>
+                            <div class="stat-label">Daily Active Users</div>
+                        </div>
+                        
+                        <div class="card stat-card">
+                            <div class="stat-number" id="weeklyGrowth">0%</div>
+                            <div class="stat-label">Weekly Growth</div>
+                        </div>
+                        
+                        <div class="card stat-card">
+                            <div class="stat-number" id="avgSession">0m</div>
+                            <div class="stat-label">Avg. Session Duration</div>
+                        </div>
+                        
+                        <div class="card stat-card">
+                            <div class="stat-number" id="consultationRate">0</div>
+                            <div class="stat-label">Consultations/Day</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            User Growth Trend
+                        </div>
+                        <div class="chart-container" id="userGrowthChart">
+                            <!-- Chart will be populated by JavaScript -->
+                            <div class="empty-state">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Chart Visualization</h3>
+                                <p>User growth chart would be displayed here with a proper charting library</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="analyticsUsers" class="analytics-tab">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-users"></i>
+                            User Demographics
+                        </div>
+                        <div class="chart-container" id="userDemographicsChart">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3>Demographics Chart</h3>
+                                <p>User demographics pie chart would be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="analyticsEngagement" class="analytics-tab">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-mouse-pointer"></i>
+                            Feature Usage
+                        </div>
+                        <div class="chart-container" id="featureUsageChart">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>Feature Usage Chart</h3>
+                                <p>Feature usage bar chart would be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Settings Section -->
+            <section id="system" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">System Settings</h2>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-bell"></i>
+                            Notification Settings
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Notifications</label>
+                            <select class="form-select">
+                                <option>Enabled</option>
+                                <option>Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SMS Notifications</label>
+                            <select class="form-select">
+                                <option>Enabled</option>
+                                <option>Disabled</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Security Settings
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Session Timeout (minutes)</label>
+                            <input type="number" class="form-input" value="30">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password Policy</label>
+                            <select class="form-select">
+                                <option>Standard</option>
+                                <option>Strong</option>
+                                <option>Very Strong</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-database"></i>
+                            System Maintenance
+                        </div>
+                        <p>Perform system maintenance tasks and backups.</p>
+                        <div class="form-group">
+                            <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px;">Backup Database</button>
+                            <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px;">Clear Cache</button>
+                            <button class="btn btn-outline" style="width: 100%;">Run System Diagnostics</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Article Modal -->
+    <div class="modal" id="addArticleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Article</h3>
+                <button class="close-modal" id="closeArticleModal">&times;</button>
+            </div>
+            <form id="addArticleForm">
+                <div class="form-group">
+                    <label for="articleTitle" class="form-label">Article Title</label>
+                    <input type="text" id="articleTitle" class="form-input" placeholder="Enter article title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="articleCategory" class="form-label">Category</label>
+                    <select id="articleCategory" class="form-select" required>
+                        <option value="">Select category</option>
+                        <option value="civil">Civil Law</option>
+                        <option value="criminal">Criminal Law</option>
+                        <option value="family">Family Law</option>
+                        <option value="property">Property Law</option>
+                        <option value="consumer">Consumer Rights</option>
+                        <option value="labor">Labor Law</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="articleContent" class="form-label">Content</label>
+                    <textarea id="articleContent" class="form-textarea" placeholder="Enter article content" required></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancelArticleBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Article</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="knowledge-hub.html">Legal Knowledge</a></li>
+                        <li><a href="find-lawyer.html">Find a Lawyer</a></li>
+                        <li><a href="case-tracking.html">Case Tracking</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const sections = document.querySelectorAll('.section');
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+        const quickActionLinks = document.querySelectorAll('.quick-action-card a[data-section]');
+        
+        // Stats elements
+        const totalUsers = document.getElementById('totalUsers');
+        const totalLawyers = document.getElementById('totalLawyers');
+        const pendingVerifications = document.getElementById('pendingVerifications');
+        const activeCases = document.getElementById('activeCases');
+        
+        // Table elements
+        const usersTable = document.getElementById('usersTable');
+        const lawyersTable = document.getElementById('lawyersTable');
+        const contentTable = document.getElementById('contentTable');
+        const casesTable = document.getElementById('casesTable');
+        const recentActivityTable = document.getElementById('recentActivityTable');
+        
+        // Search and filter elements
+        const userSearch = document.getElementById('userSearch');
+        const userRoleFilter = document.getElementById('userRoleFilter');
+        const userStatusFilter = document.getElementById('userStatusFilter');
+        const lawyerSearch = document.getElementById('lawyerSearch');
+        const verificationFilter = document.getElementById('verificationFilter');
+        const caseSearch = document.getElementById('caseSearch');
+        const caseStatusFilter = document.getElementById('caseStatusFilter');
+        
+        // Modal elements
+        const addArticleModal = document.getElementById('addArticleModal');
+        const closeArticleModal = document.getElementById('closeArticleModal');
+        const cancelArticleBtn = document.getElementById('cancelArticleBtn');
+        const addArticleForm = document.getElementById('addArticleForm');
+        const addArticleBtn = document.getElementById('addArticleBtn');
+        
+        // Analytics elements
+        const dailyActiveUsers = document.getElementById('dailyActiveUsers');
+        const weeklyGrowth = document.getElementById('weeklyGrowth');
+        const avgSession = document.getElementById('avgSession');
+        const consultationRate = document.getElementById('consultationRate');
+        const analyticsTabs = document.querySelectorAll('.analytics-tab');
+        const tabButtons = document.querySelectorAll('.tab');
+
+        // Current user data
+        let currentUser = null;
+
+        // Check authentication and load user data
+        async function initializeAdminPanel() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            
+            // Check if user is an admin
+            await checkAdminRole();
+            
+            // Load user data
+            await loadUserData();
+            
+            // Load dashboard data
+            await loadDashboardData();
+            
+            // Load recent activity
+            await loadRecentActivity();
+            
+            // Load users table
+            await loadUsersTable();
+            
+            // Load lawyers table
+            await loadLawyersTable();
+            
+            // Load content table
+            await loadContentTable();
+            
+            // Load cases table
+            await loadCasesTable();
+        }
+
+        // Check if user has admin role
+        async function checkAdminRole() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error checking user role:', error);
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            if (data.role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Update UI with user data
+            userName.textContent = data.full_name || 'Admin';
+            
+            // Set avatar with first letter of name
+            if (data.full_name) {
+                userAvatar.textContent = data.full_name.charAt(0).toUpperCase();
+            }
+        }
+
+        // Load user data from database
+        async function loadUserData() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading user data:', error);
+                return;
+            }
+            
+            if (data) {
+                // Update UI with user data
+                userName.textContent = data.full_name || 'Admin';
+                
+                // Set avatar with first letter of name
+                if (data.full_name) {
+                    userAvatar.textContent = data.full_name.charAt(0).toUpperCase();
+                }
+            }
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardData() {
+            // Load total users count
+            const { data: usersData, error: usersError } = await supabase
+                .from('users')
+                .select('*', { count: 'exact' });
+            
+            if (!usersError && usersData) {
+                totalUsers.textContent = usersData.length;
+            }
+            
+            // Load total lawyers count
+            const { data: lawyersData, error: lawyersError } = await supabase
+                .from('users')
+                .select('*', { count: 'exact' })
+                .eq('role', 'lawyer');
+            
+            if (!lawyersError && lawyersData) {
+                totalLawyers.textContent = lawyersData.length;
+            }
+            
+            // Load pending verifications count
+            const { data: pendingData, error: pendingError } = await supabase
+                .from('lawyer_profiles')
+                .select('*', { count: 'exact' })
+                .eq('verified', false);
+            
+            if (!pendingError && pendingData) {
+                pendingVerifications.textContent = pendingData.length;
+            }
+            
+            // Load active cases count
+            const { data: casesData, error: casesError } = await supabase
+                .from('cases')
+                .select('*', { count: 'exact' })
+                .eq('status', 'active');
+            
+            if (!casesError && casesData) {
+                activeCases.textContent = casesData.length;
+            }
+            
+            // Load analytics data (simplified for demo)
+            dailyActiveUsers.textContent = '1,247';
+            weeklyGrowth.textContent = '12.5%';
+            avgSession.textContent = '8m 34s';
+            consultationRate.textContent = '47';
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            // For now, we'll create some sample activity
+            // In a real app, this would come from an activity log table
+            const sampleActivity = [
+                {
+                    user: 'Rahul Kumar',
+                    action: 'Registered as Citizen',
+                    timestamp: new Date().toLocaleString(),
+                    ip: '192.168.1.105'
+                },
+                {
+                    user: 'Priya Sharma',
+                    action: 'Lawyer Profile Updated',
+                    timestamp: new Date(Date.now() - 3600000).toLocaleString(),
+                    ip: '192.168.1.110'
+                },
+                {
+                    user: 'Admin User',
+                    action: 'Verified Lawyer Profile',
+                    timestamp: new Date(Date.now() - 7200000).toLocaleString(),
+                    ip: '192.168.1.1'
+                },
+                {
+                    user: 'Anita Mehta',
+                    action: 'Uploaded Document',
+                    timestamp: new Date(Date.now() - 10800000).toLocaleString(),
+                    ip: '192.168.1.115'
+                },
+                {
+                    user: 'System',
+                    action: 'Database Backup Completed',
+                    timestamp: new Date(Date.now() - 14400000).toLocaleString(),
+                    ip: '127.0.0.1'
+                }
+            ];
+            
+            // Update UI with recent activity
+            if (sampleActivity.length > 0) {
+                recentActivityTable.innerHTML = '';
+                
+                sampleActivity.forEach(activity => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${activity.user}</td>
+                        <td>${activity.action}</td>
+                        <td>${activity.timestamp}</td>
+                        <td>${activity.ip}</td>
+                    `;
+                    
+                    recentActivityTable.appendChild(row);
+                });
+            } else {
+                // Show empty state
+                recentActivityTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>No recent activity</h3>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Load users table
+        async function loadUsersTable() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading users:', error);
+                return;
+            }
+            
+            // Update UI with users
+            if (data && data.length > 0) {
+                usersTable.innerHTML = '';
+                
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${user.full_name || 'N/A'}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>${user.phone || 'N/A'}</td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td class="table-actions">
+                            <button class="btn btn-outline btn-small">View</button>
+                            <button class="btn btn-warning btn-small">Edit</button>
+                            <button class="btn btn-danger btn-small">Delete</button>
+                        </td>
+                    `;
+                    
+                    usersTable.appendChild(row);
+                });
+            } else {
+                // Show empty state
+                usersTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>No users found</h3>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Load lawyers table
+        async function loadLawyersTable() {
+            const { data, error } = await supabase
+                .from('lawyer_profiles')
+                .select(`
+                    *,
+                    users(full_name, email)
+                `)
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading lawyers:', error);
+                return;
+            }
+            
+            // Update UI with lawyers
+            if (data && data.length > 0) {
+                lawyersTable.innerHTML = '';
+                
+                data.forEach(lawyer => {
+                    const statusClass = lawyer.verified ? 'status-verified' : 'status-pending';
+                    const statusText = lawyer.verified ? 'Verified' : 'Pending';
+                    const userName = lawyer.users ? lawyer.users.full_name : 'N/A';
+                    
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${userName}</td>
+                        <td>${lawyer.specialization || 'N/A'}</td>
+                        <td>${lawyer.experience_years || '0'} years</td>
+                        <td>${lawyer.location || 'N/A'}</td>
+                        <td>${lawyer.bar_registration_id || 'N/A'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td class="table-actions">
+                            ${!lawyer.verified ? `
+                                <button class="btn btn-success btn-small verify-lawyer-btn" data-id="${lawyer.id}">Verify</button>
+                            ` : ''}
+                            <button class="btn btn-outline btn-small">View</button>
+                            <button class="btn btn-warning btn-small">Edit</button>
+                        </td>
+                    `;
+                    
+                    lawyersTable.appendChild(row);
+                });
+                
+                // Add event listeners to verify buttons
+                document.querySelectorAll('.verify-lawyer-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const lawyerId = e.target.getAttribute('data-id');
+                        verifyLawyer(lawyerId);
+                    });
+                });
+            } else {
+                // Show empty state
+                lawyersTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>No lawyers found</h3>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Load content table
+        async function loadContentTable() {
+            const { data, error } = await supabase
+                .from('legal_knowledge')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading content:', error);
+                return;
+            }
+            
+            // Update UI with content
+            if (data && data.length > 0) {
+                contentTable.innerHTML = '';
+                
+                data.forEach(article => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${article.title}</td>
+                        <td>${article.category}</td>
+                        <td>${new Date(article.created_at).toLocaleDateString()}</td>
+                        <td>${new Date(article.created_at).toLocaleDateString()}</td>
+                        <td class="table-actions">
+                            <button class="btn btn-outline btn-small">View</button>
+                            <button class="btn btn-warning btn-small">Edit</button>
+                            <button class="btn btn-danger btn-small">Delete</button>
+                        </td>
+                    `;
+                    
+                    contentTable.appendChild(row);
+                });
+            } else {
+                // Show empty state
+                contentTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>No articles found</h3>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Load cases table
+        async function loadCasesTable() {
+            const { data, error } = await supabase
+                .from('cases')
+                .select(`
+                    *,
+                    users(full_name)
+                `)
+                .order('last_updated', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading cases:', error);
+                return;
+            }
+            
+            // Update UI with cases
+            if (data && data.length > 0) {
+                casesTable.innerHTML = '';
+                
+                data.forEach(caseItem => {
+                    const userName = caseItem.users ? caseItem.users.full_name : 'N/A';
+                    const statusClass = `status-${caseItem.status}`;
+                    
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${caseItem.case_number}</td>
+                        <td>${caseItem.court_name}</td>
+                        <td>${userName}</td>
+                        <td><span class="status-badge ${statusClass}">${caseItem.status}</span></td>
+                        <td>${caseItem.next_hearing ? new Date(caseItem.next_hearing).toLocaleDateString() : 'N/A'}</td>
+                        <td>${new Date(caseItem.last_updated).toLocaleDateString()}</td>
+                        <td class="table-actions">
+                            <button class="btn btn-outline btn-small">View</button>
+                            <button class="btn btn-warning btn-small">Edit</button>
+                        </td>
+                    `;
+                    
+                    casesTable.appendChild(row);
+                });
+            } else {
+                // Show empty state
+                casesTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-gavel"></i>
+                            <h3>No cases found</h3>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Verify lawyer
+        async function verifyLawyer(lawyerId) {
+            const { data, error } = await supabase
+                .from('lawyer_profiles')
+                .update({ verified: true })
+                .eq('id', lawyerId);
+            
+            if (error) {
+                console.error('Error verifying lawyer:', error);
+                alert('Failed to verify lawyer. Please try again.');
+                return;
+            }
+            
+            // Reload lawyers table and dashboard data
+            await loadLawyersTable();
+            await loadDashboardData();
+            
+            alert('Lawyer verified successfully!');
+        }
+
+        // Add new article
+        async function addNewArticle(articleData) {
+            const { data, error } = await supabase
+                .from('legal_knowledge')
+                .insert([
+                    {
+                        title: articleData.title,
+                        category: articleData.category,
+                        content: articleData.content
+                    }
+                ]);
+            
+            if (error) {
+                console.error('Error adding article:', error);
+                alert('Failed to add article. Please try again.');
+                return false;
+            }
+            
+            // Reload content table
+            await loadContentTable();
+            return true;
+        }
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Section navigation
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Get target section
+                const targetSection = link.getAttribute('data-section');
+                
+                // Hide all sections
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Show target section
+                document.getElementById(targetSection).classList.add('active');
+            });
+        });
+
+        // Quick action navigation
+        quickActionLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Get target section
+                const targetSection = link.getAttribute('data-section');
+                
+                // Remove active class from all sidebar links
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to target sidebar link
+                document.querySelector(`.sidebar-menu a[data-section="${targetSection}"]`).classList.add('active');
+                
+                // Hide all sections
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Show target section
+                document.getElementById(targetSection).classList.add('active');
+            });
+        });
+
+        // Article modal
+        addArticleBtn.addEventListener('click', () => {
+            addArticleModal.style.display = 'flex';
+        });
+
+        closeArticleModal.addEventListener('click', () => {
+            addArticleModal.style.display = 'none';
+        });
+
+        cancelArticleBtn.addEventListener('click', () => {
+            addArticleModal.style.display = 'none';
+        });
+
+        addArticleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const articleData = {
+                title: document.getElementById('articleTitle').value,
+                category: document.getElementById('articleCategory').value,
+                content: document.getElementById('articleContent').value
+            };
+            
+            const success = await addNewArticle(articleData);
+            
+            if (success) {
+                addArticleModal.style.display = 'none';
+                addArticleForm.reset();
+            }
+        });
+
+        // Analytics tabs
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                tabButtons.forEach(tab => tab.classList.remove('active'));
+                analyticsTabs.forEach(tab => tab.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                document.getElementById(`analytics${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+            });
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === addArticleModal) {
+                addArticleModal.style.display = 'none';
+            }
+        });
+
+        // Initialize the admin panel when page loads
+        document.addEventListener('DOMContentLoaded', initializeAdminPanel);
+    </script>
+</body>
+</html>

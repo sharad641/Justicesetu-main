@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Management - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --warning: #f57c00;
+            --info: #0288d1;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--navy-blue);
+            color: var(--navy-blue);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: var(--white);
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: var(--white);
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--navy-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            color: var(--gold);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left: 4px solid var(--gold);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .welcome-section {
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h1 {
+            color: var(--navy-blue);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: var(--dark-gray);
+            max-width: 600px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--navy-blue);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 25px 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy-blue);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* Filters */
+        .filters-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .filter-select, .filter-input {
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+            font-size: 0.95rem;
+            min-width: 150px;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        /* Cases List */
+        .cases-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .case-card {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .case-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .case-client {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .client-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .client-meta {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .case-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-closed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-urgent {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .case-details {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .detail-group {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .case-actions {
+            padding: 20px;
+            border-top: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 700px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            color: var(--navy-blue);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--medium-gray);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--gold);
+            color: var(--navy-blue);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Case Notes */
+        .case-notes {
+            margin-top: 20px;
+        }
+
+        .note-item {
+            padding: 15px;
+            border-left: 4px solid var(--gold);
+            background-color: var(--light-gray);
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .note-date {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .note-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+            
+            .case-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+            }
+            
+            .filter-select, .filter-input {
+                min-width: 100%;
+            }
+            
+            .case-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .case-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">L</div>
+                <div class="user-name" id="userName">Lawyer</div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="lawyer-dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="consultation-requests.html"><i class="fas fa-calendar-check"></i> Consultations</a></li>
+                <li><a href="#" class="active"><i class="fas fa-gavel"></i> Case Management</a></li>
+                <li><a href="clients.html"><i class="fas fa-users"></i> Clients</a></li>
+                <li><a href="documents.html"><i class="fas fa-file-contract"></i> Documents</a></li>
+                <li><a href="profile.html"><i class="fas fa-user-tie"></i> Profile</a></li>
+                <li><a href="knowledge-hub.html"><i class="fas fa-book"></i> Legal Resources</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Case Management</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <section class="stats-grid">
+                <div class="card stat-card">
+                    <div class="stat-number" id="totalCasesCount">0</div>
+                    <div class="stat-label">Total Cases</div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="stat-number" id="activeCasesCount">0</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="stat-number" id="pendingCasesCount">0</div>
+                    <div class="stat-label">Pending Cases</div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="stat-number" id="upcomingHearingsCount">0</div>
+                    <div class="stat-label">Upcoming Hearings</div>
+                </div>
+            </section>
+
+            <!-- Filters Section -->
+            <section class="filters-section">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-filter"></i>
+                        Filter Cases
+                    </div>
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">Status</label>
+                            <select class="filter-select" id="statusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="closed">Closed</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Court</label>
+                            <select class="filter-select" id="courtFilter">
+                                <option value="all">All Courts</option>
+                                <option value="Supreme Court">Supreme Court</option>
+                                <option value="High Court">High Court</option>
+                                <option value="District Court">District Court</option>
+                                <option value="Session Court">Session Court</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Client</label>
+                            <input type="text" class="filter-input" id="clientFilter" placeholder="Search by client name">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Case Number</label>
+                            <input type="text" class="filter-input" id="caseNumberFilter" placeholder="Search by case number">
+                        </div>
+                        
+                        <div class="filter-group" style="align-self: flex-end;">
+                            <button class="btn btn-outline" id="clearFiltersBtn">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cases List -->
+            <section class="cases-list" id="casesList">
+                <!-- Cases will be populated by JavaScript -->
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <h3>No cases found</h3>
+                    <p>You don't have any cases matching your filters</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Case Details Modal -->
+    <div class="modal" id="caseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Case Details</h3>
+                <button class="close-modal" id="closeCaseModal">&times;</button>
+            </div>
+            <div id="caseModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Case Modal -->
+    <div class="modal" id="addCaseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Case</h3>
+                <button class="close-modal" id="closeAddCaseModal">&times;</button>
+            </div>
+            <form id="addCaseForm">
+                <div class="form-group">
+                    <label class="form-label">Case Number</label>
+                    <input type="text" class="form-input" id="caseNumber" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Case Title</label>
+                    <input type="text" class="form-input" id="caseTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Client Name</label>
+                    <input type="text" class="form-input" id="clientName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Court Name</label>
+                    <input type="text" class="form-input" id="courtName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Case Type</label>
+                    <select class="form-select" id="caseType" required>
+                        <option value="">Select Case Type</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Criminal">Criminal</option>
+                        <option value="Family">Family</option>
+                        <option value="Property">Property</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Case Description</label>
+                    <textarea class="form-textarea" id="caseDescription" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Next Hearing Date</label>
+                    <input type="date" class="form-input" id="nextHearingDate">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancelAddCaseBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Case</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Note Modal -->
+    <div class="modal" id="addNoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Case Note</h3>
+                <button class="close-modal" id="closeAddNoteModal">&times;</button>
+            </div>
+            <form id="addNoteForm">
+                <div class="form-group">
+                    <label class="form-label">Note Title</label>
+                    <input type="text" class="form-input" id="noteTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Note Content</label>
+                    <textarea class="form-textarea" id="noteContent" required></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancelAddNoteBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmationModalTitle">Confirm Action</h3>
+                <button class="close-modal" id="closeConfirmationModal">&times;</button>
+            </div>
+            <div id="confirmationModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="cancelConfirmBtn">Cancel</button>
+                <button class="btn" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="knowledge-hub.html">Legal Knowledge</a></li>
+                        <li><a href="consultation-requests.html">Consultations</a></li>
+                        <li><a href="case-management.html">Case Management</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const totalCasesCount = document.getElementById('totalCasesCount');
+        const activeCasesCount = document.getElementById('activeCasesCount');
+        const pendingCasesCount = document.getElementById('pendingCasesCount');
+        const upcomingHearingsCount = document.getElementById('upcomingHearingsCount');
+        const casesList = document.getElementById('casesList');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const statusFilter = document.getElementById('statusFilter');
+        const courtFilter = document.getElementById('courtFilter');
+        const clientFilter = document.getElementById('clientFilter');
+        const caseNumberFilter = document.getElementById('caseNumberFilter');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const caseModal = document.getElementById('caseModal');
+        const closeCaseModal = document.getElementById('closeCaseModal');
+        const caseModalContent = document.getElementById('caseModalContent');
+        const addCaseModal = document.getElementById('addCaseModal');
+        const closeAddCaseModal = document.getElementById('closeAddCaseModal');
+        const addCaseForm = document.getElementById('addCaseForm');
+        const cancelAddCaseBtn = document.getElementById('cancelAddCaseBtn');
+        const addNoteModal = document.getElementById('addNoteModal');
+        const closeAddNoteModal = document.getElementById('closeAddNoteModal');
+        const addNoteForm = document.getElementById('addNoteForm');
+        const cancelAddNoteBtn = document.getElementById('cancelAddNoteBtn');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
+        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
+        const confirmationModalContent = document.getElementById('confirmationModalContent');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmActionBtn = document.getElementById('confirmActionBtn');
+
+        // Current user data
+        let currentUser = null;
+        let currentCaseId = null;
+        let currentAction = null;
+
+        // Check authentication and load user data
+        async function initializePage() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            
+            // Check if user is a lawyer
+            if (currentUser.user_metadata?.role !== 'lawyer') {
+                alert('This page is for lawyers only. Redirecting to citizen dashboard.');
+                window.location.href = 'citizen-dashboard.html';
+                return;
+            }
+            
+            // Load user data
+            await loadUserData();
+            
+            // Load cases
+            await loadCases();
+            
+            // Load case statistics
+            await loadCaseStatistics();
+        }
+
+        // Load user data from database
+        async function loadUserData() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading user data:', error);
+                return;
+            }
+            
+            if (data) {
+                // Update UI with user data
+                userName.textContent = data.full_name || 'Lawyer';
+                
+                // Set avatar with first letter of name
+                if (data.full_name) {
+                    userAvatar.textContent = data.full_name.charAt(0).toUpperCase();
+                }
+            }
+        }
+
+        // Load case statistics
+        async function loadCaseStatistics() {
+            // Total cases count
+            const { data: totalCases, error: totalError } = await supabase
+                .from('cases')
+                .select('*', { count: 'exact' })
+                .eq('user_id', currentUser.id);
+            
+            if (!totalError && totalCases) {
+                totalCasesCount.textContent = totalCases.length;
+            }
+            
+            // Active cases count
+            const { data: activeCases, error: activeError } = await supabase
+                .from('cases')
+                .select('*', { count: 'exact' })
+                .eq('user_id', currentUser.id)
+                .eq('status', 'active');
+            
+            if (!activeError && activeCases) {
+                activeCasesCount.textContent = activeCases.length;
+            }
+            
+            // Pending cases count
+            const { data: pendingCases, error: pendingError } = await supabase
+                .from('cases')
+                .select('*', { count: 'exact' })
+                .eq('user_id', currentUser.id)
+                .eq('status', 'pending');
+            
+            if (!pendingError && pendingCases) {
+                pendingCasesCount.textContent = pendingCases.length;
+            }
+            
+            // Upcoming hearings count (cases with next_hearing date in the next 30 days)
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+            
+            const { data: upcomingHearings, error: upcomingError } = await supabase
+                .from('cases')
+                .select('*', { count: 'exact' })
+                .eq('user_id', currentUser.id)
+                .gte('next_hearing', new Date().toISOString().split('T')[0])
+                .lte('next_hearing', thirtyDaysFromNow.toISOString().split('T')[0]);
+            
+            if (!upcomingError && upcomingHearings) {
+                upcomingHearingsCount.textContent = upcomingHearings.length;
+            }
+        }
+
+        // Load cases
+        async function loadCases() {
+            // Build query based on filters
+            let query = supabase
+                .from('cases')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('last_updated', { ascending: false });
+
+            // Apply status filter
+            if (statusFilter.value !== 'all') {
+                query = query.eq('status', statusFilter.value);
+            }
+
+            // Apply court filter
+            if (courtFilter.value !== 'all') {
+                query = query.eq('court_name', courtFilter.value);
+            }
+
+            // Apply client filter
+            if (clientFilter.value) {
+                // In a real app, we would join with users table to filter by client name
+                // For now, we'll simulate this with case_number as a placeholder
+                query = query.ilike('case_number', `%${clientFilter.value}%`);
+            }
+
+            // Apply case number filter
+            if (caseNumberFilter.value) {
+                query = query.ilike('case_number', `%${caseNumberFilter.value}%`);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Error loading cases:', error);
+                return;
+            }
+            
+            // Update UI with cases
+            if (data && data.length > 0) {
+                casesList.innerHTML = '';
+                
+                data.forEach(caseItem => {
+                    const caseElement = document.createElement('div');
+                    caseElement.className = 'card case-card';
+                    
+                    const statusClass = `status-${caseItem.status}`;
+                    const clientName = caseItem.case_number || 'Unknown Client';
+                    const clientInitial = clientName.charAt(0).toUpperCase();
+                    const nextHearingDate = caseItem.next_hearing ? new Date(caseItem.next_hearing).toLocaleDateString() : 'Not scheduled';
+                    
+                    caseElement.innerHTML = `
+                        <div class="case-header">
+                            <div class="case-client">
+                                <div class="client-avatar">${clientInitial}</div>
+                                <div class="client-info">
+                                    <h3>${caseItem.case_number}</h3>
+                                    <div class="client-meta">
+                                        <span><i class="fas fa-gavel"></i> ${caseItem.court_name || 'Court not specified'}</span>
+                                        <span><i class="fas fa-calendar"></i> ${nextHearingDate}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="case-status ${statusClass}">${caseItem.status}</div>
+                        </div>
+                        
+                        <div class="case-details">
+                            <div class="detail-group">
+                                <div class="detail-label">Case Title</div>
+                                <div class="detail-value">${caseItem.case_title || 'No title provided'}</div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="detail-label">Case Type</div>
+                                <div class="detail-value">${caseItem.case_type || 'Not specified'}</div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="detail-label">Last Updated</div>
+                                <div class="detail-value">${new Date(caseItem.last_updated).toLocaleDateString()}</div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">${caseItem.description || 'No description provided'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="case-actions">
+                            <button class="btn btn-outline btn-small view-case-btn" data-id="${caseItem.id}">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="btn btn-info btn-small add-note-btn" data-id="${caseItem.id}">
+                                <i class="fas fa-sticky-note"></i> Add Note
+                            </button>
+                            <button class="btn btn-warning btn-small update-status-btn" data-id="${caseItem.id}">
+                                <i class="fas fa-edit"></i> Update Status
+                            </button>
+                            <button class="btn btn-danger btn-small delete-case-btn" data-id="${caseItem.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    
+                    casesList.appendChild(caseElement);
+                });
+                
+                // Add event listeners to buttons
+                document.querySelectorAll('.view-case-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const caseId = e.target.getAttribute('data-id');
+                        showCaseDetails(caseId);
+                    });
+                });
+                
+                document.querySelectorAll('.add-note-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const caseId = e.target.getAttribute('data-id');
+                        showAddNoteModal(caseId);
+                    });
+                });
+                
+                document.querySelectorAll('.update-status-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const caseId = e.target.getAttribute('data-id');
+                        showUpdateStatusModal(caseId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-case-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const caseId = e.target.getAttribute('data-id');
+                        showConfirmationModal('Delete Case', 'Are you sure you want to delete this case? This action cannot be undone.', 'delete', caseId);
+                    });
+                });
+            } else {
+                // Show empty state
+                casesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No cases found</h3>
+                        <p>You don't have any cases matching your filters</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Show case details in modal
+        async function showCaseDetails(caseId) {
+            const { data, error } = await supabase
+                .from('cases')
+                .select('*')
+                .eq('id', caseId)
+                .single();
+            
+            if (error) {
+                console.error('Error loading case details:', error);
+                return;
+            }
+            
+            if (data) {
+                const nextHearingDate = data.next_hearing ? new Date(data.next_hearing).toLocaleDateString() : 'Not scheduled';
+                const lastUpdated = new Date(data.last_updated).toLocaleDateString();
+                
+                caseModalContent.innerHTML = `
+                    <div class="tabs">
+                        <div class="tab active" data-tab="details">Case Details</div>
+                        <div class="tab" data-tab="notes">Case Notes</div>
+                        <div class="tab" data-tab="documents">Documents</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="details-tab">
+                        <div class="form-group">
+                            <label class="form-label">Case Information</label>
+                            <div style="padding: 10px; background-color: #f9f9f9; border-radius: 5px;">
+                                <p><strong>Case Number:</strong> ${data.case_number}</p>
+                                <p><strong>Case Title:</strong> ${data.case_title || 'No title provided'}</p>
+                                <p><strong>Court Name:</strong> ${data.court_name || 'Not specified'}</p>
+                                <p><strong>Case Type:</strong> ${data.case_type || 'Not specified'}</p>
+                                <p><strong>Status:</strong> ${data.status}</p>
+                                <p><strong>Next Hearing:</strong> ${nextHearingDate}</p>
+                                <p><strong>Last Updated:</strong> ${lastUpdated}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Case Description</label>
+                            <p style="padding: 10px; background-color: #f9f9f9; border-radius: 5px;">
+                                ${data.description || 'No description provided.'}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="notes-tab">
+                        <div class="case-notes">
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <strong>Initial Case Review</strong>
+                                    <span class="note-date">${lastUpdated}</span>
+                                </div>
+                                <div class="note-content">
+                                    Initial review of case documents and client consultation completed. Case appears to have merit based on preliminary assessment.
+                                </div>
+                            </div>
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <strong>Evidence Collection</strong>
+                                    <span class="note-date">${new Date(new Date().setDate(new Date().getDate() - 2)).toLocaleDateString()}</span>
+                                </div>
+                                <div class="note-content">
+                                    Collected initial evidence and documentation from client. Additional witness statements needed.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button class="btn btn-primary" id="addNewNoteBtn">
+                                <i class="fas fa-plus"></i> Add New Note
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="documents-tab">
+                        <div class="empty-state">
+                            <i class="fas fa-file"></i>
+                            <h3>No documents uploaded</h3>
+                            <p>Upload case documents to keep them organized in one place</p>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Document
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" id="closeModalBtn">Close</button>
+                    </div>
+                `;
+                
+                caseModal.style.display = 'flex';
+                
+                // Add event listeners to tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tabName = e.target.getAttribute('data-tab');
+                        
+                        // Remove active class from all tabs and contents
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        // Add active class to clicked tab and corresponding content
+                        e.target.classList.add('active');
+                        document.getElementById(`${tabName}-tab`).classList.add('active');
+                    });
+                });
+                
+                // Add event listener to close button
+                document.getElementById('closeModalBtn').addEventListener('click', () => {
+                    caseModal.style.display = 'none';
+                });
+                
+                // Add event listener to add new note button
+                document.getElementById('addNewNoteBtn').addEventListener('click', () => {
+                    caseModal.style.display = 'none';
+                    showAddNoteModal(caseId);
+                });
+            }
+        }
+
+        // Show add note modal
+        function showAddNoteModal(caseId) {
+            currentCaseId = caseId;
+            addNoteModal.style.display = 'flex';
+        }
+
+        // Show update status modal
+        function showUpdateStatusModal(caseId) {
+            currentCaseId = caseId;
+            showConfirmationModal('Update Case Status', 'Select new status for this case:', 'update-status', caseId);
+        }
+
+        // Show confirmation modal
+        function showConfirmationModal(title, message, action, caseId) {
+            confirmationModalTitle.textContent = title;
+            currentCaseId = caseId;
+            currentAction = action;
+            
+            if (action === 'update-status') {
+                confirmationModalContent.innerHTML = `
+                    <p>${message}</p>
+                    <div class="form-group">
+                        <select class="form-select" id="newStatusSelect">
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="closed">Closed</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                `;
+                confirmActionBtn.textContent = 'Update Status';
+                confirmActionBtn.className = 'btn btn-warning';
+            } else {
+                confirmationModalContent.innerHTML = `<p>${message}</p>`;
+                confirmActionBtn.textContent = 'Delete';
+                confirmActionBtn.className = 'btn btn-danger';
+            }
+            
+            confirmationModal.style.display = 'flex';
+        }
+
+        // Update case status
+        async function updateCaseStatus(status) {
+            const { data, error } = await supabase
+                .from('cases')
+                .update({ 
+                    status: status,
+                    last_updated: new Date().toISOString()
+                })
+                .eq('id', currentCaseId);
+            
+            if (error) {
+                console.error('Error updating case status:', error);
+                alert('Failed to update case status. Please try again.');
+                return;
+            }
+            
+            // Reload cases and statistics
+            await loadCases();
+            await loadCaseStatistics();
+            
+            // Close modal
+            confirmationModal.style.display = 'none';
+            
+            alert('Case status updated successfully!');
+        }
+
+        // Delete case
+        async function deleteCase() {
+            const { data, error } = await supabase
+                .from('cases')
+                .delete()
+                .eq('id', currentCaseId);
+            
+            if (error) {
+                console.error('Error deleting case:', error);
+                alert('Failed to delete case. Please try again.');
+                return;
+            }
+            
+            // Reload cases and statistics
+            await loadCases();
+            await loadCaseStatistics();
+            
+            // Close modal
+            confirmationModal.style.display = 'none';
+            
+            alert('Case deleted successfully!');
+        }
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            loadCases();
+            loadCaseStatistics();
+        });
+
+        // Filter change events
+        statusFilter.addEventListener('change', loadCases);
+        courtFilter.addEventListener('change', loadCases);
+        clientFilter.addEventListener('input', loadCases);
+        caseNumberFilter.addEventListener('input', loadCases);
+
+        clearFiltersBtn.addEventListener('click', () => {
+            statusFilter.value = 'all';
+            courtFilter.value = 'all';
+            clientFilter.value = '';
+            caseNumberFilter.value = '';
+            loadCases();
+        });
+
+        // Modal close events
+        closeCaseModal.addEventListener('click', () => {
+            caseModal.style.display = 'none';
+        });
+
+        closeAddCaseModal.addEventListener('click', () => {
+            addCaseModal.style.display = 'none';
+        });
+
+        cancelAddCaseBtn.addEventListener('click', () => {
+            addCaseModal.style.display = 'none';
+        });
+
+        closeAddNoteModal.addEventListener('click', () => {
+            addNoteModal.style.display = 'none';
+        });
+
+        cancelAddNoteBtn.addEventListener('click', () => {
+            addNoteModal.style.display = 'none';
+        });
+
+        closeConfirmationModal.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        cancelConfirmBtn.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        // Form submissions
+        addCaseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const caseData = {
+                user_id: currentUser.id,
+                case_number: document.getElementById('caseNumber').value,
+                case_title: document.getElementById('caseTitle').value,
+                court_name: document.getElementById('courtName').value,
+                case_type: document.getElementById('caseType').value,
+                description: document.getElementById('caseDescription').value,
+                status: 'active',
+                next_hearing: document.getElementById('nextHearingDate').value || null,
+                last_updated: new Date().toISOString()
+            };
+            
+            const { data, error } = await supabase
+                .from('cases')
+                .insert([caseData]);
+            
+            if (error) {
+                console.error('Error adding case:', error);
+                alert('Failed to add case. Please try again.');
+                return;
+            }
+            
+            // Reload cases and statistics
+            await loadCases();
+            await loadCaseStatistics();
+            
+            // Close modal and reset form
+            addCaseModal.style.display = 'none';
+            addCaseForm.reset();
+            
+            alert('Case added successfully!');
+        });
+
+        addNoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // In a real app, we would save the note to a database table
+            // For now, we'll just show a success message
+            
+            // Close modal and reset form
+            addNoteModal.style.display = 'none';
+            addNoteForm.reset();
+            
+            alert('Case note added successfully!');
+        });
+
+        // Confirm action button
+        confirmActionBtn.addEventListener('click', () => {
+            if (currentAction === 'update-status') {
+                const newStatus = document.getElementById('newStatusSelect').value;
+                updateCaseStatus(newStatus);
+            } else if (currentAction === 'delete') {
+                deleteCase();
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === caseModal) {
+                caseModal.style.display = 'none';
+            }
+            if (e.target === addCaseModal) {
+                addCaseModal.style.display = 'none';
+            }
+            if (e.target === addNoteModal) {
+                addNoteModal.style.display = 'none';
+            }
+            if (e.target === confirmationModal) {
+                confirmationModal.style.display = 'none';
+            }
+        });
+
+        // Initialize the page when it loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

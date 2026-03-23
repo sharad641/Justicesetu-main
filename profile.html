@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - JusticeSetu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --navy-blue: #1a237e;
+            --navy-blue-light: #283593;
+            --gold: #ffb300;
+            --gold-light: #ffca28;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #424242;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --warning: #f57c00;
+            --info: #0288d1;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--navy-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--navy-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--navy-blue);
+            color: var(--navy-blue);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--navy-blue);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: var(--white);
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: var(--white);
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--navy-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--navy-blue);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy-blue);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            color: var(--gold);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-left: 4px solid var(--gold);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--navy-blue);
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--navy-blue) 0%, var(--navy-blue-light) 100%);
+            border-radius: var(--border-radius);
+            color: var(--white);
+        }
+
+        .profile-avatar {
+            position: relative;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--navy-blue);
+            border: 4px solid var(--gold-light);
+        }
+
+        .change-avatar-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--white);
+            color: var(--navy-blue);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-info h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .verified {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #4caf50;
+        }
+
+        .pending {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ff9800;
+        }
+
+        /* Profile Content */
+        .profile-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--navy-blue);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--navy-blue);
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Tags Input */
+        .tags-input-container {
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            min-height: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background-color: var(--light-gray);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: var(--dark-gray);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0;
+        }
+
+        .tags-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            padding: 5px;
+        }
+
+        /* Rating */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stars {
+            color: var(--gold);
+        }
+
+        .rating-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .rating-count {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card-small {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-number-small {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label-small {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--gold);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--gold);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            color: var(--navy-blue);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-balance-scale"></i>
+                JusticeSetu
+            </a>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">L</div>
+                <div class="user-name" id="userName">Lawyer</div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="lawyer-dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="consultation-requests.html"><i class="fas fa-calendar-check"></i> Consultations</a></li>
+                <li><a href="case-management.html"><i class="fas fa-gavel"></i> Case Management</a></li>
+                <li><a href="clients.html"><i class="fas fa-users"></i> Clients</a></li>
+                <li><a href="documents.html"><i class="fas fa-file-contract"></i> Documents</a></li>
+                <li><a href="#" class="active"><i class="fas fa-user-tie"></i> Profile</a></li>
+                <li><a href="knowledge-hub.html"><i class="fas fa-book"></i> Legal Resources</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">My Profile</h1>
+                <button class="btn btn-outline" id="refreshProfileBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Profile Header -->
+            <section class="card profile-header">
+                <div class="profile-avatar">
+                    <div class="avatar-placeholder" id="avatarPlaceholder">L</div>
+                    <button class="change-avatar-btn" id="changeAvatarBtn">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">Advocate Name</h1>
+                    <p class="profile-tagline" id="profileTagline">Specializing in Civil Law & Corporate Law</p>
+                    <div class="verification-badge pending" id="verificationStatus">
+                        <i class="fas fa-clock"></i> Verification Pending
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Left Column: Profile Form -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-user-edit"></i>
+                        Personal Information
+                    </div>
+                    
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-input" id="fullName" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-input" id="email" required disabled>
+                                <small style="color: var(--dark-gray); display: block; margin-top: 5px;">Email cannot be changed</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" id="phone">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Bar Registration ID</label>
+                                <input type="text" class="form-input" id="barRegistrationId" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Professional Bio</label>
+                            <textarea class="form-textarea" id="bio" placeholder="Tell clients about your experience, expertise, and approach..."></textarea>
+                        </div>
+                        
+                        <div class="card-title" style="margin-top: 30px;">
+                            <i class="fas fa-briefcase"></i>
+                            Professional Information
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Primary Specialization</label>
+                                <select class="form-select" id="specialization" required>
+                                    <option value="">Select Specialization</option>
+                                    <option value="Civil Law">Civil Law</option>
+                                    <option value="Criminal Law">Criminal Law</option>
+                                    <option value="Corporate Law">Corporate Law</option>
+                                    <option value="Family Law">Family Law</option>
+                                    <option value="Property Law">Property Law</option>
+                                    <option value="Intellectual Property">Intellectual Property</option>
+                                    <option value="Tax Law">Tax Law</option>
+                                    <option value="Labor Law">Labor Law</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Years of Experience</label>
+                                <input type="number" class="form-input" id="experienceYears" min="0" max="50" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Location/City</label>
+                                <input type="text" class="form-input" id="location" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Hourly Rate (₹)</label>
+                                <input type="number" class="form-input" id="hourlyRate" min="0" step="500">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Languages Spoken</label>
+                            <div class="tags-input-container" id="languagesContainer">
+                                <!-- Tags will be added here by JavaScript -->
+                                <input type="text" class="tags-input" id="languageInput" placeholder="Type a language and press Enter">
+                            </div>
+                            <small style="color: var(--dark-gray); display: block; margin-top: 5px;">Press Enter to add a language</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Areas of Expertise</label>
+                            <div class="tags-input-container" id="expertiseContainer">
+                                <!-- Tags will be added here by JavaScript -->
+                                <input type="text" class="tags-input" id="expertiseInput" placeholder="Type an expertise area and press Enter">
+                            </div>
+                            <small style="color: var(--dark-gray); display: block; margin-top: 5px;">Press Enter to add an expertise area</small>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button type="button" class="btn btn-outline" id="cancelChangesBtn">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Right Column: Stats & Info -->
+                <div>
+                    <!-- Rating Card -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-title">
+                            <i class="fas fa-star"></i>
+                            Client Rating
+                        </div>
+                        <div class="rating-display">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div class="rating-value" id="ratingValue">4.7</div>
+                            <div class="rating-count" id="ratingCount">(24 reviews)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Card -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Practice Statistics
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card-small">
+                                <div class="stat-number-small" id="activeCasesCount">12</div>
+                                <div class="stat-label-small">Active Cases</div>
+                            </div>
+                            <div class="stat-card-small">
+                                <div class="stat-number-small" id="totalClientsCount">48</div>
+                                <div class="stat-label-small">Total Clients</div>
+                            </div>
+                            <div class="stat-card-small">
+                                <div class="stat-number-small" id="consultationsCount">156</div>
+                                <div class="stat-label-small">Consultations</div>
+                            </div>
+                            <div class="stat-card-small">
+                                <div class="stat-number-small" id="successRate">92%</div>
+                                <div class="stat-label-small">Success Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Verification Card -->
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Account Verification
+                        </div>
+                        <div id="verificationInfo">
+                            <p style="margin-bottom: 15px;">Your profile verification is currently <strong id="verificationStatusText">pending</strong>.</p>
+                            <p style="margin-bottom: 15px; font-size: 0.9rem;">To get verified, please ensure you have:</p>
+                            <ul style="padding-left: 20px; margin-bottom: 20px; font-size: 0.9rem;">
+                                <li>Valid Bar Council registration</li>
+                                <li>Professional identification</li>
+                                <li>Completed profile information</li>
+                            </ul>
+                            <button class="btn btn-outline btn-small" id="requestVerificationBtn">
+                                <i class="fas fa-paper-plane"></i> Request Verification
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Change Avatar Modal -->
+    <div class="modal" id="avatarModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Change Profile Picture</h3>
+                <button class="close-modal" id="closeAvatarModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div class="avatar-placeholder" style="width: 120px; height: 120px; margin: 0 auto 20px; font-size: 2.5rem;" id="modalAvatarPlaceholder">L</div>
+                    <p style="margin-bottom: 15px;">Upload a new profile picture</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Select Image</label>
+                    <input type="file" class="form-input" id="avatarFileInput" accept="image/*">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancelAvatarBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="uploadAvatarBtn">Upload Picture</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmationModalTitle">Confirm Action</h3>
+                <button class="close-modal" id="closeConfirmationModal">&times;</button>
+            </div>
+            <div id="confirmationModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="cancelConfirmBtn">Cancel</button>
+                <button class="btn" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>JusticeSetu</h3>
+                    <p>Making legal assistance accessible, understandable, and affordable for everyone through technology.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="knowledge-hub.html">Legal Knowledge</a></li>
+                        <li><a href="consultation-requests.html">Consultations</a></li>
+                        <li><a href="case-management.html">Case Management</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 JusticeSetu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://nbomdnnaigiamjmdvpon.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ib21kbm5haWdpYW1qbWR2cG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzY1NTksImV4cCI6MjA3NzQxMjU1OX0.xmsxZDfw23xC2a98hvIuB0uSjDzg6bivfjNK_KActyE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM Elements
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const refreshProfileBtn = document.getElementById('refreshProfileBtn');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        const profileName = document.getElementById('profileName');
+        const profileTagline = document.getElementById('profileTagline');
+        const verificationStatus = document.getElementById('verificationStatus');
+        const verificationStatusText = document.getElementById('verificationStatusText');
+        const profileForm = document.getElementById('profileForm');
+        const fullName = document.getElementById('fullName');
+        const email = document.getElementById('email');
+        const phone = document.getElementById('phone');
+        const barRegistrationId = document.getElementById('barRegistrationId');
+        const bio = document.getElementById('bio');
+        const specialization = document.getElementById('specialization');
+        const experienceYears = document.getElementById('experienceYears');
+        const location = document.getElementById('location');
+        const hourlyRate = document.getElementById('hourlyRate');
+        const languagesContainer = document.getElementById('languagesContainer');
+        const languageInput = document.getElementById('languageInput');
+        const expertiseContainer = document.getElementById('expertiseContainer');
+        const expertiseInput = document.getElementById('expertiseInput');
+        const ratingValue = document.getElementById('ratingValue');
+        const ratingCount = document.getElementById('ratingCount');
+        const activeCasesCount = document.getElementById('activeCasesCount');
+        const totalClientsCount = document.getElementById('totalClientsCount');
+        const consultationsCount = document.getElementById('consultationsCount');
+        const successRate = document.getElementById('successRate');
+        const cancelChangesBtn = document.getElementById('cancelChangesBtn');
+        const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+        const requestVerificationBtn = document.getElementById('requestVerificationBtn');
+        const avatarModal = document.getElementById('avatarModal');
+        const closeAvatarModal = document.getElementById('closeAvatarModal');
+        const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
+        const avatarFileInput = document.getElementById('avatarFileInput');
+        const cancelAvatarBtn = document.getElementById('cancelAvatarBtn');
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
+        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
+        const confirmationModalContent = document.getElementById('confirmationModalContent');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmActionBtn = document.getElementById('confirmActionBtn');
+
+        // Current user data
+        let currentUser = null;
+        let lawyerProfile = null;
+        let languages = ['English'];
+        let expertiseAreas = [];
+
+        // Check authentication and load user data
+        async function initializePage() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            
+            // Check if user is a lawyer
+            if (currentUser.user_metadata?.role !== 'lawyer') {
+                alert('This page is for lawyers only. Redirecting to citizen dashboard.');
+                window.location.href = 'citizen-dashboard.html';
+                return;
+            }
+            
+            // Load user data
+            await loadUserData();
+            
+            // Load lawyer profile
+            await loadLawyerProfile();
+            
+            // Load statistics
+            await loadStatistics();
+            
+            // Initialize form
+            initializeForm();
+        }
+
+        // Load user data from database
+        async function loadUserData() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading user data:', error);
+                return;
+            }
+            
+            if (data) {
+                // Update header with user data
+                userName.textContent = data.full_name || 'Lawyer';
+                
+                // Set avatar with first letter of name
+                const initial = data.full_name ? data.full_name.charAt(0).toUpperCase() : 'L';
+                userAvatar.textContent = initial;
+                avatarPlaceholder.textContent = initial;
+                modalAvatarPlaceholder.textContent = initial;
+                
+                // Set profile name
+                profileName.textContent = data.full_name || 'Advocate Name';
+                
+                // Set form values
+                fullName.value = data.full_name || '';
+                email.value = data.email || '';
+                phone.value = data.phone || '';
+                barRegistrationId.value = data.bar_registration_id || '';
+            }
+        }
+
+        // Load lawyer profile
+        async function loadLawyerProfile() {
+            const { data, error } = await supabase
+                .from('lawyer_profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading lawyer profile:', error);
+                // Create a default profile if it doesn't exist
+                await createDefaultLawyerProfile();
+                return;
+            }
+            
+            lawyerProfile = data;
+            
+            // Update verification status
+            updateVerificationStatus();
+            
+            // Set form values from lawyer profile
+            if (lawyerProfile) {
+                bio.value = lawyerProfile.bio || '';
+                specialization.value = lawyerProfile.specialization || '';
+                experienceYears.value = lawyerProfile.experience_years || 0;
+                location.value = lawyerProfile.location || '';
+                hourlyRate.value = lawyerProfile.hourly_rate || '';
+                
+                // Set languages
+                languages = lawyerProfile.languages || ['English'];
+                renderLanguages();
+                
+                // Set expertise areas
+                expertiseAreas = lawyerProfile.expertise_areas || [];
+                renderExpertiseAreas();
+                
+                // Set rating
+                if (lawyerProfile.rating) {
+                    ratingValue.textContent = lawyerProfile.rating.toFixed(1);
+                }
+                
+                // Set tagline
+                if (lawyerProfile.specialization) {
+                    profileTagline.textContent = `Specializing in ${lawyerProfile.specialization}`;
+                }
+            }
+        }
+
+        // Create default lawyer profile if it doesn't exist
+        async function createDefaultLawyerProfile() {
+            const { data, error } = await supabase
+                .from('lawyer_profiles')
+                .insert([
+                    {
+                        id: currentUser.id,
+                        specialization: '',
+                        experience_years: 0,
+                        location: '',
+                        languages: ['English'],
+                        verified: false,
+                        rating: 0,
+                        bio: '',
+                        hourly_rate: 0
+                    }
+                ])
+                .select()
+                .single();
+            
+            if (error) {
+                console.error('Error creating lawyer profile:', error);
+                return;
+            }
+            
+            lawyerProfile = data;
+        }
+
+        // Update verification status display
+        function updateVerificationStatus() {
+            if (lawyerProfile?.verified) {
+                verificationStatus.className = 'verification-badge verified';
+                verificationStatus.innerHTML = '<i class="fas fa-check-circle"></i> Verified Lawyer';
+                verificationStatusText.textContent = 'verified';
+                requestVerificationBtn.style.display = 'none';
+            } else {
+                verificationStatus.className = 'verification-badge pending';
+                verificationStatus.innerHTML = '<i class="fas fa-clock"></i> Verification Pending';
+                verificationStatusText.textContent = 'pending';
+                requestVerificationBtn.style.display = 'block';
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            // Load active cases count (using confirmed consultations as proxy)
+            const { data: casesData, error: casesError } = await supabase
+                .from('consultations')
+                .select('*', { count: 'exact' })
+                .eq('lawyer_id', currentUser.id)
+                .eq('status', 'confirmed');
+            
+            if (!casesError && casesData) {
+                activeCasesCount.textContent = casesData.length;
+            }
+            
+            // Load clients count (unique citizens who have consultations with this lawyer)
+            const { data: clientsData, error: clientsError } = await supabase
+                .from('consultations')
+                .select('citizen_id')
+                .eq('lawyer_id', currentUser.id);
+            
+            if (!clientsError && clientsData) {
+                const uniqueClients = new Set(clientsData.map(item => item.citizen_id));
+                totalClientsCount.textContent = uniqueClients.size;
+            }
+            
+            // Load consultations count
+            const { data: consultationsData, error: consultationsError } = await supabase
+                .from('consultations')
+                .select('*', { count: 'exact' })
+                .eq('lawyer_id', currentUser.id);
+            
+            if (!consultationsError && consultationsData) {
+                consultationsCount.textContent = consultationsData.length;
+            }
+            
+            // Success rate (random for demo)
+            successRate.textContent = '92%';
+            
+            // Rating count (random for demo)
+            ratingCount.textContent = '(24 reviews)';
+        }
+
+        // Initialize form
+        function initializeForm() {
+            // Initialize languages tag input
+            languageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const language = languageInput.value.trim();
+                    if (language && !languages.includes(language)) {
+                        languages.push(language);
+                        renderLanguages();
+                        languageInput.value = '';
+                    }
+                }
+            });
+
+            // Initialize expertise areas tag input
+            expertiseInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const expertise = expertiseInput.value.trim();
+                    if (expertise && !expertiseAreas.includes(expertise)) {
+                        expertiseAreas.push(expertise);
+                        renderExpertiseAreas();
+                        expertiseInput.value = '';
+                    }
+                }
+            });
+        }
+
+        // Render languages as tags
+        function renderLanguages() {
+            // Clear container except the input
+            const existingTags = languagesContainer.querySelectorAll('.tag');
+            existingTags.forEach(tag => tag.remove());
+            
+            // Add tags for each language
+            languages.forEach(language => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    ${language}
+                    <button type="button" class="tag-remove" data-language="${language}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                languagesContainer.insertBefore(tag, languageInput);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.tag-remove[data-language]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const languageToRemove = e.target.closest('.tag-remove').getAttribute('data-language');
+                    languages = languages.filter(lang => lang !== languageToRemove);
+                    renderLanguages();
+                });
+            });
+        }
+
+        // Render expertise areas as tags
+        function renderExpertiseAreas() {
+            // Clear container except the input
+            const existingTags = expertiseContainer.querySelectorAll('.tag');
+            existingTags.forEach(tag => tag.remove());
+            
+            // Add tags for each expertise area
+            expertiseAreas.forEach(expertise => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    ${expertise}
+                    <button type="button" class="tag-remove" data-expertise="${expertise}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                expertiseContainer.insertBefore(tag, expertiseInput);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.tag-remove[data-expertise]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const expertiseToRemove = e.target.closest('.tag-remove').getAttribute('data-expertise');
+                    expertiseAreas = expertiseAreas.filter(exp => exp !== expertiseToRemove);
+                    renderExpertiseAreas();
+                });
+            });
+        }
+
+        // Save profile
+        async function saveProfile() {
+            // Update user data
+            const { error: userError } = await supabase
+                .from('users')
+                .update({
+                    full_name: fullName.value,
+                    phone: phone.value,
+                    bar_registration_id: barRegistrationId.value
+                })
+                .eq('id', currentUser.id);
+            
+            if (userError) {
+                console.error('Error updating user data:', userError);
+                alert('Failed to update personal information. Please try again.');
+                return false;
+            }
+            
+            // Update lawyer profile
+            const { error: profileError } = await supabase
+                .from('lawyer_profiles')
+                .update({
+                    specialization: specialization.value,
+                    experience_years: parseInt(experienceYears.value) || 0,
+                    location: location.value,
+                    languages: languages,
+                    expertise_areas: expertiseAreas,
+                    bio: bio.value,
+                    hourly_rate: parseFloat(hourlyRate.value) || 0
+                })
+                .eq('id', currentUser.id);
+            
+            if (profileError) {
+                console.error('Error updating lawyer profile:', profileError);
+                alert('Failed to update professional information. Please try again.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        refreshProfileBtn.addEventListener('click', async () => {
+            await loadUserData();
+            await loadLawyerProfile();
+            await loadStatistics();
+            alert('Profile refreshed!');
+        });
+
+        // Form submission
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const success = await saveProfile();
+            
+            if (success) {
+                // Update displayed profile information
+                userName.textContent = fullName.value || 'Lawyer';
+                profileName.textContent = fullName.value || 'Advocate Name';
+                
+                // Update avatar initial
+                const initial = fullName.value ? fullName.value.charAt(0).toUpperCase() : 'L';
+                userAvatar.textContent = initial;
+                avatarPlaceholder.textContent = initial;
+                modalAvatarPlaceholder.textContent = initial;
+                
+                // Update tagline
+                if (specialization.value) {
+                    profileTagline.textContent = `Specializing in ${specialization.value}`;
+                }
+                
+                alert('Profile updated successfully!');
+            }
+        });
+
+        cancelChangesBtn.addEventListener('click', () => {
+            // Reload original data
+            loadUserData();
+            loadLawyerProfile();
+        });
+
+        // Avatar modal
+        changeAvatarBtn.addEventListener('click', () => {
+            avatarModal.style.display = 'flex';
+        });
+
+        closeAvatarModal.addEventListener('click', () => {
+            avatarModal.style.display = 'none';
+            avatarFileInput.value = '';
+        });
+
+        cancelAvatarBtn.addEventListener('click', () => {
+            avatarModal.style.display = 'none';
+            avatarFileInput.value = '';
+        });
+
+        uploadAvatarBtn.addEventListener('click', () => {
+            // In a real app, this would upload the image to storage
+            // For now, we'll just show a success message
+            alert('Profile picture updated successfully!');
+            avatarModal.style.display = 'none';
+            avatarFileInput.value = '';
+        });
+
+        // Request verification
+        requestVerificationBtn.addEventListener('click', () => {
+            showConfirmationModal(
+                'Request Verification',
+                'Are you sure you want to request verification? Our team will review your profile and documentation.',
+                'request-verification'
+            );
+        });
+
+        // Show confirmation modal
+        function showConfirmationModal(title, message, action) {
+            confirmationModalTitle.textContent = title;
+            confirmationModalContent.innerHTML = `<p>${message}</p>`;
+            
+            confirmActionBtn.textContent = 'Request Verification';
+            confirmActionBtn.className = 'btn btn-primary';
+            confirmActionBtn.onclick = () => {
+                // In a real app, this would send a verification request
+                alert('Verification request submitted! Our team will review your profile within 3-5 business days.');
+                confirmationModal.style.display = 'none';
+            };
+            
+            confirmationModal.style.display = 'flex';
+        }
+
+        closeConfirmationModal.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        cancelConfirmBtn.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === avatarModal) {
+                avatarModal.style.display = 'none';
+                avatarFileInput.value = '';
+            }
+            if (e.target === confirmationModal) {
+                confirmationModal.style.display = 'none';
+            }
+        });
+
+        // Initialize the page when it loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

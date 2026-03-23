@@ -1,0 +1,47 @@
+{
+  "users": [
+    {
+      "id": "a94cc45f-7297-4c1c-bbb7-3590035614e5",
+      "name": "sharad",
+      "email": "sharadpatil02003@gmail.com",
+      "role": "citizen"
+    },
+    {
+      "id": "d3effc64-acdf-4347-ad60-f502b918eb6c",
+      "name": "suhani",
+      "email": "sharadpatil1704@gmail.com",
+      "role": "lawyer"
+    },
+    {
+      "id": "56c9fb74-0b72-44e5-b7eb-70529b1cc866",
+      "name": "sharadpatil",
+      "email": "sharadpatilrocks42@gmail.com",
+      "role": "citizen"
+    }
+  ],
+  "cases": [],
+  "consultations": [
+    {
+      "id": "7bc7a0e7-f0e7-4428-a0d7-eac540c7c9c3",
+      "scheduledAt": "2026-03-24 03:30:00.000 +00:00",
+      "status": "pending",
+      "issueDescription": "ghjk",
+      "paymentStatus": "paid",
+      "createdAt": "2026-03-22 12:33:28.999 +00:00",
+      "updatedAt": "2026-03-22 12:33:28.999 +00:00",
+      "citizenId": "56c9fb74-0b72-44e5-b7eb-70529b1cc866",
+      "lawyerId": "d3effc64-acdf-4347-ad60-f502b918eb6c"
+    },
+    {
+      "id": "e628825c-03f9-4276-bfa2-d40ee0d7cc21",
+      "scheduledAt": "2026-03-26 10:30:00.000 +00:00",
+      "status": "pending",
+      "issueDescription": "4567",
+      "paymentStatus": "paid",
+      "createdAt": "2026-03-22 12:37:26.387 +00:00",
+      "updatedAt": "2026-03-22 12:37:26.387 +00:00",
+      "citizenId": "a94cc45f-7297-4c1c-bbb7-3590035614e5",
+      "lawyerId": "d3effc64-acdf-4347-ad60-f502b918eb6c"
+    }
+  ]
+}

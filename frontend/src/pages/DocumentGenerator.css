@@ -1,0 +1,526 @@
+/* ===== Document Generator Styles ===== */
+.docgen-page {
+  min-height: calc(100vh - 80px);
+  padding: 32px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Hero Header */
+.docgen-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  border-radius: 20px;
+  padding: 40px 36px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.docgen-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(99, 102, 241, 0.15), transparent 60%),
+    radial-gradient(ellipse at 85% 50%, rgba(16, 185, 129, 0.1), transparent 60%);
+  pointer-events: none;
+}
+
+.docgen-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.docgen-hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.docgen-hero p {
+  color: #94a3b8;
+  font-size: 1rem;
+  max-width: 600px;
+}
+
+/* Document Type Selector */
+.docgen-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.docgen-type-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 24px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.docgen-type-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.docgen-type-card.selected {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
+}
+
+.docgen-type-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  font-size: 1.5rem;
+}
+
+.docgen-type-card h3 {
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.docgen-type-card p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Steps Progress */
+.docgen-steps-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.docgen-step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.docgen-step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.docgen-step-dot.active {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border-color: #6366f1;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+}
+
+.docgen-step-dot.completed {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.docgen-step-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.docgen-step-label.active {
+  color: #a5b4fc;
+}
+
+.docgen-step-label.completed {
+  color: #10b981;
+}
+
+.docgen-step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  min-width: 20px;
+}
+
+.docgen-step-line.completed {
+  background: #10b981;
+}
+
+/* Form Panel */
+.docgen-main-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.docgen-form-panel,
+.docgen-preview-panel {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.docgen-panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.docgen-panel-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.docgen-panel-body {
+  padding: 24px;
+}
+
+/* Form Fields */
+.docgen-field {
+  margin-bottom: 20px;
+}
+
+.docgen-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #a5b4fc;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.docgen-field input,
+.docgen-field textarea,
+.docgen-field select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-main);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.docgen-field input:focus,
+.docgen-field textarea:focus,
+.docgen-field select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.docgen-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.docgen-field input::placeholder,
+.docgen-field textarea::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.docgen-field .field-error {
+  color: #ef4444;
+  font-size: 0.78rem;
+  margin-top: 5px;
+}
+
+.docgen-field input.error,
+.docgen-field textarea.error {
+  border-color: #ef4444;
+}
+
+/* Form Buttons */
+.docgen-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.docgen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.docgen-btn-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.docgen-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.docgen-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.docgen-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docgen-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.docgen-btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.docgen-btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+/* Preview Area */
+.docgen-preview-content {
+  background: #fff;
+  color: #1a1a1a;
+  padding: 40px 48px;
+  border-radius: 8px;
+  min-height: 500px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.docgen-preview-content h2 {
+  text-align: center;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-bottom: 2px solid #333;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  color: #111;
+}
+
+.docgen-preview-content h3 {
+  font-size: 1.05rem;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.docgen-preview-content p {
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.docgen-preview-content .doc-field-highlight {
+  background: #fff3cd;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.docgen-preview-content .doc-signature-block {
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.docgen-preview-content .doc-signature-block div {
+  text-align: center;
+}
+
+.docgen-preview-content .doc-signature-line {
+  width: 180px;
+  border-top: 1px solid #333;
+  margin-top: 50px;
+  padding-top: 8px;
+  font-size: 0.85rem;
+}
+
+/* Editable Preview */
+.docgen-edit-area {
+  width: 100%;
+  min-height: 500px;
+  padding: 40px 48px;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  resize: vertical;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.docgen-edit-area:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Action Toolbar */
+.docgen-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Empty/Placeholder State */
+.docgen-empty-preview {
+  text-align: center;
+  padding: 80px 32px;
+  color: var(--text-muted);
+}
+
+.docgen-empty-preview svg {
+  opacity: 0.25;
+  margin-bottom: 20px;
+}
+
+.docgen-empty-preview h3 {
+  color: var(--text-main);
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.docgen-empty-preview p {
+  max-width: 350px;
+  margin: 0 auto;
+  font-size: 0.9rem;
+}
+
+/* Toast/notification */
+.docgen-toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #10b981;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+  z-index: 9999;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .docgen-main-area {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .docgen-page {
+    padding: 16px 12px;
+  }
+
+  .docgen-hero {
+    padding: 24px 20px;
+  }
+
+  .docgen-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .docgen-type-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .docgen-type-card {
+    padding: 16px 12px;
+  }
+
+  .docgen-steps-bar {
+    overflow-x: auto;
+    padding: 12px 16px;
+  }
+
+  .docgen-preview-content,
+  .docgen-edit-area {
+    padding: 24px 20px;
+    font-size: 0.88rem;
+  }
+
+  .docgen-btn-row {
+    flex-direction: column;
+  }
+
+  .docgen-actions {
+    flex-direction: column;
+  }
+
+  .docgen-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .docgen-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
