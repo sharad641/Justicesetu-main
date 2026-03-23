@@ -8,6 +8,7 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'https://justicesetu-main-7i7r.vercel.app',
+  'https://justicesetu-main-7i7r-76bckqune-dakshs-projects-74bc9c00.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000'
 ];
